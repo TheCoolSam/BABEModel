@@ -1,0 +1,6 @@
+#Dependencies
+# Install:  pip install -r requirements.txt
+mesa==0.9.0
+numpy>=1.19
+networkx>=2.5
+pandas>=1.1
