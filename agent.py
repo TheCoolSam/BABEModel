@@ -4,13 +4,13 @@ agent.py — SocialAgent for the Dynamic-BABE Model
 Implements the full state-vector architecture described in the
 theoretical specification:
 
-  • N-dimensional Opinion  (Ō_i ∈ [-1, 1]^N)
-  • Salience weighting      (S̄_i, Σ = 1)
-  • Cognitive Entrenchment  (β_i ≥ 0)          ← Chen et al. (2021)
-  • Behavioral Frustration  (F_i ∈ ℤ≥0)       ← NOVEL
-  • Active / Churned status                     ← NOVEL
+  * N-dimensional Opinion
+  * Salience weighting
+  * Cognitive Entrenchment <- Chen et al. (2021)
+  * Behavioral Frustration <- NOVEL
+  * Active / Churned status <- NOVEL
 
-All heavy math uses numpy for O(n) vectorised performance.
+All heavy math uses numpy.
 """
 
 import numpy as np
@@ -30,7 +30,7 @@ class SocialAgent(Agent):
 
         n = cfg.NUM_ISSUES
 
-        # ── Opinion vector  Ō_i ∈ [-1, 1]^N ────────────────────────
+        # Opinion vector
         if getattr(cfg, 'OPINION_INIT_MODE', 'uniform') == 'bipolar':
             # Bipolar: 50/50 split into two camps (±0.7 ± noise)
             # Models an already-polarised society (realistic for social media)
@@ -42,21 +42,46 @@ class SocialAgent(Agent):
             # Uniform: classic U(-1, 1) initialization
             self.opinion = rng.uniform(-1.0, 1.0, size=n)
 
-        # ── Salience vector  S̄_i  (Dirichlet → sums to 1) ───────────
+        # Salience vector (Dirichlet sums to 1)
         self.salience: np.ndarray = rng.dirichlet(np.ones(n))
 
-        # ── Cognitive entrenchment  β_i ~ N(μ, σ²), floored ──────────
+        # Cognitive entrenchment, normally distributed and floored
         #    Source: Chen et al. (2021) BEBA framework
         self.beta: float = max(
             cfg.BETA_MIN,
             rng.normal(cfg.BETA_MEAN, cfg.BETA_STD),
         )
 
-        # ── NOVEL: Behavioral frustration counter ─────────────────────
+        # NOVEL: Behavioral frustration counter
         self.frustration: int = 0
 
-        # ── NOVEL: Churn flag ─────────────────────────────────────────
+        # NOVEL: Churn flag
         self.active: bool = True
+
+    # ------------------------------------------------------------------ #
+    #  Trust accessor (NOVEL — Dyadic Trust extension)
+    # ------------------------------------------------------------------ #
+
+    def get_trust(self, other):
+        """
+        Query the symmetric trust weight on the edge (self, other).
+
+        Trust is stored on the network edge, not on the agent, because
+        it is a dyadic (relationship) property.
+        Returns cfg.TRUST_INITIAL if trust is disabled or edge is missing.
+
+        NOTE: Currently symmetric (T_ij = T_ji). Future work should
+              explore asymmetric trust.
+        """
+        if not self.model.enable_trust:
+            return cfg.TRUST_INITIAL
+        """symmetric (T_ij = T_ji)"""
+        G = self.model.G
+        if G.has_edge(self.unique_id, other.unique_id):
+            return G[self.unique_id][other.unique_id].get(
+                'trust', cfg.TRUST_INITIAL
+            )
+        return cfg.TRUST_INITIAL
 
     # ------------------------------------------------------------------ #
     #  Core maths (called by model.py interaction loop)
@@ -64,9 +89,7 @@ class SocialAgent(Agent):
 
     def compute_alignment(self, other):
         """
-        Weighted dot-product alignment  A_ij.
-
-            A_ij = (Ō_i · Ō_j) × mean(S̄_i, S̄_j)
+        Weighted dot-product alignment.
 
         Returns a scalar in approximately [-1, 1].
         """
@@ -75,27 +98,21 @@ class SocialAgent(Agent):
 
     def compute_influence_weight(self, alignment):
         """
-        Chen et al. (2021) influence weight:
+        Chen et al. (2021) influence weight
 
-            w_ij = 1 + (β_i × A_ij)
-
-        The '1' encodes baseline trust; high β with negative alignment
+        The '1' encodes baseline trust; high beta with negative alignment
         can drive w_ij well below zero (backfire territory).
         """
         return 1.0 + (self.beta * alignment)
-
-    # ------------------------------------------------------------------ #
-    #  Jager-Amblard Social Judgment Zones
-    # ------------------------------------------------------------------ #
 
     @staticmethod
     def classify_zone(w_ij):
         """
         Map influence weight to a Social Judgment Theory zone.
 
-        Zone 1 — Latitude of Acceptance   (w > 0.3)   → Assimilation
-        Zone 2 — Latitude of Non-Commit.  (0 ≤ w ≤ 0.3) → Ignore
-        Zone 3 — Latitude of Rejection    (w < 0)     → Backfire
+        Zone 1 - Latitude of Acceptance -> Assimilation
+        Zone 2 - Latitude of Non-Commitment -> Ignore
+        Zone 3 - Latitude of Rejection -> Backfire
         """
         if w_ij > cfg.ASSIMILATION_THRESHOLD:
             return 1
@@ -104,18 +121,12 @@ class SocialAgent(Agent):
         else:
             return 3
 
-    # ------------------------------------------------------------------ #
-    #  Update rules
-    # ------------------------------------------------------------------ #
-
     def assimilate(self, other, w_ij):
         """
-        Modified DeGroot (1974) consensus update — CONSTRUCTIVE path,
+        Modified DeGroot (1974) consensus update - CONSTRUCTIVE path,
         with confirmation-bias dampening.
 
-        Step size μ is attenuated by cognitive entrenchment:
-            μ = w_ij / (1 + β_i)      ← high β resists change
-            Ō_i(t+1) = Ō_i(t) + μ · (Ō_j(t) − Ō_i(t))
+        Step size is attenuated by cognitive entrenchment: high beta resists change.
 
         This preserves DeGroot's direction (pull toward the other)
         but entrenched agents move much less per interaction.
@@ -129,17 +140,15 @@ class SocialAgent(Agent):
 
     def backfire(self, other, w_ij):
         """
-        Repulsion path — BACKFIRE.
+        Repulsion path - BACKFIRE.
 
-        Agent i's opinion is pushed *away* from agent j:
-            repulsion = |w_ij| / (1 + β_i)
-            Ō_i(t+1) = Ō_i(t) + repulsion · (Ō_i(t) − Ō_j(t))
+        Agent's opinion is pushed *away* from the other agent.
 
         This moves agent i in the OPPOSITE direction from j,
-        amplifying polarization. The step is dampened by β so
+        amplifying polarization. The step is dampened by beta so
         already-extreme agents don't overshoot.
 
-        ── NOVEL CONTRIBUTION ──────────────────────────────────────
+        # NOVEL CONTRIBUTION
         Each backfire event increments F_i (Behavioral Frustration).
         """
         # Push opinion AWAY from the other agent
@@ -147,12 +156,8 @@ class SocialAgent(Agent):
         away = self.opinion - other.opinion      # Direction away from j
         self.opinion = np.clip(self.opinion + repulsion * away, -1.0, 1.0)
 
-        # ── NOVEL: frustration accrual ────────────────────────────
+        # NOVEL: frustration accrual
         self.frustration += 1
-
-    # ------------------------------------------------------------------ #
-    #  NOVEL: Toxic Churn Check
-    # ------------------------------------------------------------------ #
 
     def check_churn(self):
         """
@@ -162,10 +167,6 @@ class SocialAgent(Agent):
         """
         if self.frustration > cfg.CHURN_THRESHOLD:
             self.active = False
-
-    # ------------------------------------------------------------------ #
-    #  Mesa scheduler hook
-    # ------------------------------------------------------------------ #
 
     def step(self):
         """

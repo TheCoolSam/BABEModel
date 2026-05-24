@@ -1,73 +1,60 @@
 """
-config.py — Dynamic-BABE Model Global Configuration
+config.py - Dynamic-BABE Model Global Configuration
 
 All simulation constants centralised here for reproducibility.
 Change values here; never hard-code numbers in agent.py / model.py.
-
-References
-----------
-* Chen, W., Pacheco, D., Yang, K.-C., & Menczer, F. (2021).
-  "Neutral bots probe political bias on social media." *Nature Communications*.
-* Jager, W., & Amblard, F. (2005).
-  "Uniformity, bipolarization and pluriformity captured as generic stylized
-  behavior with an agent-based simulation model of attitude change."
-  *Computational & Mathematical Organization Theory*.
-* DeGroot, M. H. (1974). "Reaching a consensus."
-  *Journal of the American Statistical Association*.
 """
 
-# ──────────────────────────────────────────────────────────────────
-# 1. POPULATION & NETWORK TOPOLOGY
-# ──────────────────────────────────────────────────────────────────
-NUM_AGENTS = 200              # Network node count
-BA_EDGE_PARAM = 3             # m in Barabasi–Albert G(n, m)
-NUM_ISSUES = 2                # Dimensionality of opinion vector
-                                   # (0 = Economic, 1 = Social)
-OPINION_INIT_MODE = "bipolar"  # "uniform" = U(-1,1);  "bipolar" = two camps
-                               # Bipolar models an already-divided society
+# Population & Network Topology
+NUM_AGENTS = 500
+BA_EDGE_PARAM = 3
+NUM_ISSUES = 2
+OPINION_INIT_MODE = "bipolar"
 
-# ──────────────────────────────────────────────────────────────────
-# 2. AGENT COGNITIVE PARAMETERS
-# ──────────────────────────────────────────────────────────────────
-BETA_MEAN = 4.0             # Mean cognitive entrenchment (β_i)
-                             # ↑ Models hyper-partisan population (Phase Transition regime)
-BETA_STD = 1.5              # Std-dev for β distribution (wider spread = more extremists)
-BETA_MIN = 0.5              # Floor clamp – nobody is perfectly open
-INTERACTIONS_PER_STEP = 1     # Neighbours sampled per tick
+# Agent Cognitive Parameters
+BETA_MEAN = 4.0
+BETA_STD = 1.5
+BETA_MIN = 0.5
+INTERACTIONS_PER_STEP = 1
 
-# ──────────────────────────────────────────────────────────────────
-# 3. SOCIAL-JUDGMENT THRESHOLDS  (Jager-Amblard Zones)
-# ──────────────────────────────────────────────────────────────────
-ASSIMILATION_THRESHOLD = 0.3   # w_ij > this → Zone 1 (accept)
-# Zone 2 (non-commitment):  0  ≤ w_ij ≤ ASSIMILATION_THRESHOLD
-# Zone 3 (backfire):         w_ij < 0
+# Social-Judgment Thresholds
+ASSIMILATION_THRESHOLD = 0.3
 
-# ──────────────────────────────────────────────────────────────────
-# 4. NOVEL CONTRIBUTION — TOXIC CHURN HYPOTHESIS
-# ──────────────────────────────────────────────────────────────────
-CHURN_THRESHOLD = 15          # T_c: frustration ceiling before churn
-HEALING_RATE = 1              # Frustration healed per assimilation event
-                              # Models positive social interactions restoring faith
-BRIDGE_HEALING_BONUS = 2      # Extra frustration healed when Bridge intercepts
-                              # a backfire — successful moderation rebuilds trust
+# Toxic Churn Hypothesis
+CHURN_THRESHOLD = 15
+HEALING_RATE = 1
+BRIDGE_HEALING_BONUS = 2
 
-# ──────────────────────────────────────────────────────────────────
-# 5. REVENUE STEP-FUNCTION
-# ──────────────────────────────────────────────────────────────────
-BASE_AD_RATE = 1.0          # Revenue-per-active-user (normalised $)
-POLARIZATION_CLIFF = 0.6   # σ threshold for Brand Safety Penalty
-SAFE_AD_MULTIPLIER = 1.0   # Ad rate when σ < cliff (100 %)
-UNSAFE_AD_MULTIPLIER = 0.4 # Ad rate when σ ≥ cliff (40 %)
+# Revenue Step-Function
+BASE_AD_RATE = 1.0
+POLARIZATION_CLIFF = 0.6
+SAFE_AD_MULTIPLIER = 1.0
+UNSAFE_AD_MULTIPLIER = 0.4
 
-# ──────────────────────────────────────────────────────────────────
-# 6. THE BRIDGE ALGORITHM  (Community-Notes–inspired dampener)
-# ──────────────────────────────────────────────────────────────────
-ENABLE_BRIDGE = False        # Toggle for A/B experiments
-BRIDGE_EFFICACY = 0.46     # 46 % success rate per intercept
+# The Bridge Algorithm
+ENABLE_BRIDGE = False
+BRIDGE_EFFICACY = 0.46
 
-# ──────────────────────────────────────────────────────────────────
-# 7. SIMULATION CONTROL
-# ──────────────────────────────────────────────────────────────────
-MAX_STEPS = 200               # Steps per single run
-BATCH_ITERATIONS = 30         # Runs for batch_run.py (30 = sufficient for CI)
-RANDOM_SEED = 42              # Master seed for reproducibility
+# Dyadic Trust (NOVEL)
+# Per-edge trust variable T_ij ∈ [0, 1] that co-evolves with opinions.
+# High trust buffers agents against occasional disagreements —
+# "friends can argue without unfriending each other."
+# NOTE: Currently symmetric (T_ij = T_ji). Future work should explore
+#       asymmetric trust where T_ij ≠ T_ji (I may trust you more than
+#       you trust me). See implementation_plan.md for rationale.
+ENABLE_TRUST = False
+TRUST_INITIAL = 0.5           # T_0: starting trust for all edges
+TRUST_INFLUENCE = 0.3         # alpha: how much trust shifts w_ij upward
+TRUST_GAIN = 0.02             # delta_+: trust gained per assimilation event
+TRUST_LOSS = 0.05             # delta_-: trust lost per backfire event
+TRUST_DECAY = 0.001           # lambda: passive trust decay per step (no interaction)
+
+# Echo Chamber Detection
+# Measures structural clustering of like-minded agents and trust
+# segregation between ingroup vs outgroup pairs.
+ENABLE_ECHO_CHAMBER_METRICS = True
+
+# Simulation Control
+MAX_STEPS = 200
+BATCH_ITERATIONS = 30
+RANDOM_SEED = 42

@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Model Data & Outputs (generated at runtime)
+output/*.csv
+figures/*.png
+output/statistical_analysis.csv
+output/interaction_analysis.csv
+output/sensitivity_results.csv
