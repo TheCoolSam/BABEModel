@@ -8,11 +8,11 @@
 
 ---
 
-## 🌟 Research Overview
+## Research Overview
 
 This repository contains the complete implementation of the **Dynamic-BABE (Biased Assimilation & Behavioral Entrenchment) Model**, an agent-based simulation exploring how algorithmic content moderation interacts with the co-evolution of dyadic interpersonal trust.
 
-### 🎭 The Paradox
+### The Paradox
 
 In modern social media platforms, toxic polarization drives user churn, hurting platform revenue. To counter this, platforms deploy **bridging algorithms** that suppress "backfire" (rejection-zone) interactions. 
 
@@ -20,7 +20,7 @@ However, we discover a paradoxical outcome: **bridging algorithms preserve platf
 
 ---
 
-## 📐 Model Architecture (ODD+D Overview)
+##  Model Architecture (ODD+D Overview)
 
 Our model extends the classic **DeGroot consensus model** by incorporating cognitive psychology and network science:
 
@@ -39,7 +39,7 @@ Our model extends the classic **DeGroot consensus model** by incorporating cogni
 
 ---
 
-## 📁 Repository Structure
+##  Repository Structure
 
 ```
 ├── agent.py            # State-vector SocialAgent (maths, assimilation, backfire)
@@ -54,9 +54,9 @@ Our model extends the classic **DeGroot consensus model** by incorporating cogni
 
 ---
 
-## 🖥️ Setup & Run Instructions (macOS & Windows)
+##  Setup & Run Instructions (macOS & Windows)
 
-### 🍏 For macOS Users (MacBook Air/Pro M1/M2/M3/M4)
+###  For macOS Users (MacBook Air/Pro)
 
 You do **not** need a specialized code editor to run the model, though we highly recommend installing **[VS Code](https://code.visualstudio.com/)** to inspect the code, configuration, and results.
 
@@ -107,11 +107,11 @@ python stats_analysis.py
 ```bash
 python visualize.py
 ```
-*Outputs 14 publication-quality PNG figures in the `./figures/` directory.*
+*Outputs 14 PNG figures in the `./figures/` directory.*
 
 ---
 
-### 🪟 For Windows Users
+### For Windows Users
 
 1. Open **PowerShell** or **Command Prompt**.
 2. Navigate to your folder: `cd C:\path\to\polarizationParadox`
@@ -127,16 +127,16 @@ python visualize.py
 
 ---
 
-## 📊 2×2 Factorial Design & Figures
+## 2×2 Factorial Design & Figures
 
 Our experiment executes a **2×2 Factorial Design** crossing the presence of the Bridge Algorithm and Dyadic Trust:
 
 | Condition Name | Bridge Algorithm | Dyadic Trust | CSV Suffix | Color |
 |----------------|------------------|--------------|------------|-------|
-| **Baseline** | OFF | OFF | `_baseline` | 🔴 Red |
-| **Bridge Only**| ON | OFF | `_bridge_only`| 🔵 Blue |
-| **Trust Only** | OFF | ON | `_trust_only` | 🟢 Green |
-| **Full Model** | ON | ON | `_full_model` | 🟣 Purple |
+| **Baseline** | OFF | OFF | `_baseline` | Red |
+| **Bridge Only**| ON | OFF | `_bridge_only`| Blue |
+| **Trust Only** | OFF | ON | `_trust_only` | Green |
+| **Full Model** | ON | ON | `_full_model` | Purple |
 
 ### Generated Figures Manifest
 
@@ -152,6 +152,6 @@ All figures are compiled directly into publication-ready sub-files inside `/figu
 
 ---
 
-## 📄 License & Open Science
+## License & Open Science
 
 This model is fully open-source under the MIT License. In compliance with **JASSS Open Science guidelines**, all code is fully seed-reproducible. The master seed is locked in `config.py` as `RANDOM_SEED = 42`.
