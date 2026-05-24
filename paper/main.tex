@@ -1,0 +1,75 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{microtype}
+\usepackage{authblk}
+
+\geometry{a4paper, margin=1in}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=blue,
+}
+
+\title{\textbf{The Polarization Paradox: How Suppressing Backfire Cascades Entrenches Ideological Segregation under Fragile Trust}}
+
+\author[1]{\textbf{Samuel Botshtein}}
+\author[1]{\textbf{Aurnob Ghose}}
+\author[1]{\textbf{Felix Pipal}}
+\author[2]{\textbf{Timothy Ehlinger}}
+
+\affil[1]{Independent Researcher}
+\affil[2]{University of Wisconsin-Milwaukee}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\input{sections/01_abstract.tex}
+\end{abstract}
+
+\clearpage
+
+\section{Introduction}
+\label{sec:intro}
+\input{sections/02_introduction.tex}
+
+\section{Related Work}
+\label{sec:related}
+\input{sections/03_related_work.tex}
+
+\section{Model Description (ODD+D Protocol)}
+\label{sec:model}
+\input{sections/04_method_odd.tex}
+
+\section{Experimental Design}
+\label{sec:experiment}
+\input{sections/05_experimental_design.tex}
+
+\section{Results}
+\label{sec:results}
+\input{sections/06_results.tex}
+
+\section{Discussion}
+\label{sec:discussion}
+\input{sections/07_discussion.tex}
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{sections/08_conclusion.tex}
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\end{document}

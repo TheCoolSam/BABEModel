@@ -1,0 +1,310 @@
+% paper/sections/04_method_odd.tex
+% Method Section following the ODD+D Protocol
+
+The model presented in this study, the Dynamic-BABE (Biased Assimilation \& Behavioral Entrenchment) model, is reported here following the standardized ODD+D (Overview, Design concepts, Details, and Decision-making) protocol \citep{Grimm2010, Muller2013}. This protocol provides a structured framework to describe agent-based models, focusing on human decision-making and cognitive processes, which are central to social media opinion dynamics.
+
+\subsection{Overview}
+
+\subsubsection{Purpose}
+The primary purpose of the Dynamic-BABE model is to investigate the complex, co-evolutionary feedback loop between interpersonal dyadic trust, individual cognitive processes of opinion dynamics (biased assimilation and backfire effects), and platform-level algorithmic moderation (specifically, bridging algorithms). By simulating these interconnected dynamics, the model aims to explain the ``Polarization Paradox''---a systemic phenomenon where platform moderation strategies succeed in keeping users active and retaining ad revenue in the short term, but paradoxically exacerbate long-term ideological segregation and trust polarization.
+
+\subsubsection{Entities, State Variables, and Scales}
+The model consists of two primary classes of entities: \textbf{agents} (representing individual social media platform users) and the \textbf{network environment} (representing the social network structure and the platform's computational layer).
+
+\paragraph{Agents:} Each agent $i \in \{1, 2, \dots, N_{\text{agents}}\}$ represents a platform user and is characterized by the following state variables:
+\begin{itemize}
+    \item \textbf{Opinion Vector} ($\vec{O}_i \in [-1, 1]^K$): A multi-dimensional real-valued vector representing the agent's ideological stance on $K$ distinct social or political issues. Each issue dimension $d \in \{1, \dots, K\}$ is scaled continuously from $-1.0$ (strongly progressive/left) to $+1.0$ (strongly conservative/right).
+    \item \textbf{Salience Vector} ($\vec{S}_i \in [0, 1]^K$): A probability distribution vector representing the relative cognitive importance or attention weight that agent $i$ allocates to each of the $K$ issues. To ensure valid weighting across issues, the salience vector is constrained such that $\sum_{d=1}^K S_{i,d} = 1.0$.
+    \item \textbf{Cognitive Entrenchment} ($\beta_i \in [\beta_{\min}, \infty)$): A positive scalar representing the agent's cognitive resistance, closed-mindedness, or susceptibility to confirmation bias \citep{Chen2021}. A higher value of $\beta_i$ indicates that the agent is more resistant to opinions discrepant from their own and more likely to experience backfire repulsion.
+    \item \textbf{Behavioral Frustration} ($F_i \in \mathbb{N}_0$): A non-negative integer counter that accumulates cognitive dissonance and psychological irritation resulting from negative, confrontational cross-cutting interactions.
+    \item \textbf{Active Status} ($\text{Active}_i \in \{\text{True}, \text{False}\}$): A boolean flag denoting whether the agent is currently participating in the social network. Agents permanently transition to $\text{Active}_i = \text{False}$ (user churn) when their frustration exceeds a critical threshold $T_c$.
+\end{itemize}
+
+\paragraph{Network and Platform Environment:} The social structure is represented as an undirected scale-free graph $G = (V, E)$ initialized using the Barab\'{a}si-Albert (BA) preferential attachment model \citep{Barabasi1999}, where $V$ represents the set of agents and $E$ represents the set of communication channels (edges). 
+\begin{itemize}
+    \item \textbf{Dyadic Interpersonal Trust} ($T_{ij} \in [0, 1]$): A real-valued symmetric weight assigned to each active edge $(i, j) \in E$. Trust represents the relational capital between agents $i$ and $j$, acting as a cognitive buffer that mitigates disagreement and co-evolves with opinion alignment. If trust is disabled, $T_{ij} = T_0 = 0.5$ for all edges.
+    \item \textbf{Algorithmic Interception Layer}: The platform's algorithm which monitors dyadic interactions. If enabled, it probabilistically intercepts interactions destined to cause a backfire, neutralizing the negative impact.
+\end{itemize}
+
+\paragraph{Scales:} The temporal scale of the model consists of discrete simulation steps (ticks) $t \in \{1, 2, \dots, t_{\max}\}$. A single step represents an arbitrary communicative epoch (e.g., a day of activity on a social platform) during which agents select neighbors for dialogue. The spatial scale is topological, defined by the scale-free network topology. The population scale is parameterized at $N_{\text{agents}} = 500$ agents connected by a scale-free network with preferential attachment edge parameter $m_e = 3$.
+
+\subsubsection{Process Overview and Scheduling}
+In each discrete simulation step $t$, the schedule executes the following sequence of operations:
+\begin{enumerate}
+    \item \textbf{Randomized Activation Order:} The simulation scheduler constructs a randomized list of all active agents to prevent artifactual sequencing effects.
+    \item \textbf{Agent Interaction Loop:} For each active agent $i$ in the randomized list:
+    \begin{enumerate}
+        \item The agent identifies the subset of its topological neighbors in $G$ who are currently active: $\mathcal{N}_i^{\text{active}}(t) = \{j \in \mathcal{N}_i : \text{Active}_j(t) = \text{True}\}$. If $\mathcal{N}_i^{\text{active}}(t)$ is empty, the agent skips its turn.
+        \item The agent selects a subset of partners $\mathcal{P} \subseteq \mathcal{N}_i^{\text{active}}(t)$ of size $k = \min(k_{\text{step}}, |\mathcal{N}_i^{\text{active}}(t)|)$ uniformly at random without replacement. Under default parameters, $k_{\text{step}} = 1$.
+        \item For each selected partner $j \in \mathcal{P}$, the directed interaction pipeline $\text{Interact}(i, j)$ is executed, wherein agent $i$'s opinion vector, frustration level, and active status are updated. In parallel, the symmetric dyadic trust $T_{ij}$ is co-evolved on the network edge.
+    \end{enumerate}
+    \item \textbf{Passive Trust Decay:} After all agents have executed their active interactions, the platform's relationship network experiences passive trust erosion due to neglect. For every edge $(u, v) \in E$, the dyadic trust decays by a fraction $\lambda$:
+    \begin{equation}
+        T_{uv}(t+1) = T_{uv}(t) \cdot (1 - \lambda)
+    \end{equation}
+    \item \textbf{Platform Diagnostics and Data Collection:} System-wide metrics (global polarization $\sigma(t)$, cumulative churn rate, average active user frustration, total active users, mean network-wide trust, ingroup/outgroup trust, trust segregation ratio, and opinion-weighted clustering) are computed and logged.
+    \item \textbf{Termination Check:} If all agents have churned ($N_{\text{active}} = 0$) or the maximum step limit $t_{\max} = 200$ is reached, the simulation terminates.
+\end{enumerate}
+
+\subsection{Design Concepts}
+
+\subsubsection{Theoretical Background}
+The cognitive architecture of the Dynamic-BABE model is grounded in \textbf{Social Judgment Theory} \citep{Sherif1961, Jager2005}, which partitions an agent's attitude spectrum into three regions: the Latitude of Acceptance (assimilative change), the Latitude of Non-Commitment (no change), and the Latitude of Rejection (contrast effect / backfire). 
+
+The mathematical formulation of cognitive entrenchment ($\beta_i$) and opinion alignment ($A_{ij}$) builds directly on the \textbf{Biased Assimilation and Behavioral Entrenchment (BEBA)} model proposed by \citet{Chen2021}, which extends the classical consensus model of \citet{DeGroot1974}. 
+
+The co-evolution of dyadic trust is conceptually derived from social psychology and risk research by \citet{Slovic1993}, which posits that trust is asymmetrical: it is difficult to build but exceptionally easy to destroy. 
+
+Finally, the relationship between user active status, frustration, and platform exit is mapped using the classic \textbf{Exit-Voice-Loyalty (EVL)} framework of \citet{Hirschman1970}.
+
+\subsubsection{Individual Decision-Making}
+The decision-making process of agents is represented by heuristic-driven cognitive updates rather than utility maximization. When agent $i$ is exposed to the opinion of agent $j$, it does not optimize a strategic payoff; instead, it updates its opinion $\vec{O}_i$ and frustration level $F_i$ automatically based on the cognitive alignment $A_{ij}$ and the resulting influence weight $w_{ij}$. 
+
+The fundamental rule is:
+\begin{itemize}
+    \item If the perceived influence weight is high and positive ($w_{ij} > \tau_{\text{assim}}$), the agent enters its Latitude of Acceptance, experiences cognitive relief, and assimilates toward the sender.
+    \item If the influence weight is moderate ($0 \leq w_{ij} \leq \tau_{\text{assim}}$), the interaction falls in the Latitude of Non-Commitment and is ignored.
+    \item If the influence weight is negative ($w_{ij} < 0$), the interaction falls in the Latitude of Rejection, triggering a defensive backfire repulsion that pushes opinions further apart and increases behavioral frustration.
+\end{itemize}
+
+\subsubsection{Learning}
+Agents do not engage in deep machine learning or reinforcement learning. However, they possess a relational memory represented by the dyadic trust weight $T_{ij}$ on the network edges. Agents ``learn'' about the reliability and ideological compatibility of their neighbors over time. Positive, assimilative interactions build trust slowly ($\delta_+$), while negative, backfiring interactions destroy trust rapidly ($\delta_-$). This co-evolutionary learning shapes the future influence of neighbors, creating a feedback loop between social network structure and opinion dynamics.
+
+\subsubsection{Individual Sensing}
+An agent $i$ has perfect local sensing of its direct topological neighbors in $G$. Specifically, when interacting with neighbor $j$, agent $i$ can sense $j$'s current opinion vector $\vec{O}_j$ and $j$'s salience vector $\vec{S}_j$. Agents cannot sense the opinions, saliences, or cognitive variables of non-neighboring agents, nor do they possess any global knowledge of the platform's aggregate polarization or network structure.
+
+\subsubsection{Individual Prediction}
+Agents are entirely reactive and operate without predictive capabilities. They do not forecast the future opinions of their neighbors, nor do they anticipate the risk of their own frustration exceeding the churn threshold.
+
+\subsubsection{Interaction}
+Interactions in the model are local, dyadic, and directional. While trust updates are symmetric across the edge $(i, j)$, the cognitive updates are executed from the perspective of the active agent $i$ receiving input from the passive partner $j$. 
+
+Platform-level algorithmic moderation (the bridging algorithm) acts as a critical filter on these interactions. By suppressing backfire interactions, the platform actively intercepts and modifies the interaction outcomes, transforming a hostile backfire into a neutral event, thereby shielding users from frustration at the cost of genuine ideological resolution.
+
+\subsubsection{Collectives}
+No formal collectives (such as coalitions, parties, or organized groups) are explicitly represented in the model. However, functional collectives emerge endogenously as a result of opinion dynamics. Specifically, agents cluster into distinct ideological camps, which we identify as ``ingroup'' and ``outgroup'' structures based on the sign of their average opinion. These emergent collectives dictate the flow of trust and the formation of echo chambers.
+
+\subsubsection{Heterogeneity}
+Agents are highly heterogeneous across multiple dimensions:
+\begin{itemize}
+    \item \textbf{Ideological Stances:} Initialized bipolarly, splitting the population into two opposed camps with positive and negative opinions.
+    \item \textbf{Issue Salience:} Agents care about different issues to different degrees, with saliences drawn from a Dirichlet distribution.
+    \item \textbf{Cognitive Entrenchment:} Each agent has a unique $\beta_i$ drawn from a normal distribution, representing their varying degrees of dogmatism.
+    \item \textbf{Network Topology:} Due to the scale-free Barab\'{a}si-Albert structure, agent degree is highly heterogeneous, with a few hub agents possessing exceptionally high connectivity and influence, while most agents have few connections.
+\end{itemize}
+
+\subsubsection{Stochasticity}
+Stochasticity is deeply integrated into the simulation to model social noise and unpredictability:
+\begin{itemize}
+    \item The network topology is generated stochastically via BA preferential attachment.
+    \item Agent activation order is randomized at the beginning of each time step.
+    \item Dialogue partner selection is stochastic, with agents choosing randomly among active neighbors.
+    \item The bridging algorithm is probabilistic, succeeding in intercepting a backfire with an efficacy rate of $E = 46\%$.
+    \item Initialization of issue saliences ($\vec{S}_i$), entrenchment ($\beta_i$), and starting opinion vectors ($\vec{O}_i$) are governed by random draws from Dirichlet, Normal, and Uniform distributions, respectively.
+\end{itemize}
+
+\subsubsection{Observation}
+System-level and agent-level data are collected at the end of each step. The primary observation variables are:
+\begin{itemize}
+    \item \textbf{Global Polarization ($\sigma(t)$):} Root-mean-square of issue-dimensional standard deviations.
+    \item \textbf{Active User Count ($N_{\text{active}}$):} Total number of agents with $\text{Active}_i = \text{True}$.
+    \item \textbf{Churn Rate:} Fraction of the population that has permanently exited.
+    \item \textbf{Average Frustration:} Mean frustration level across active agents.
+    \item \textbf{Platform Revenue ($R(t)$):} Aggregate step-wise ad revenue subject to brand safety penalties.
+    \item \textbf{Trust Segregation Ratio:} Ratio of mean ingroup trust to outgroup trust.
+    \item \textbf{Opinion-Weighted Clustering Coefficient:} Fraction of topological triangles sharing the same opinion pole.
+\end{itemize}
+
+\subsection{Details and Decision-Making}
+
+This section details the governing mathematical equations and rules that define the initialization, dyadic interactions, trust co-evolution, user churn, and platform revenue.
+
+\subsubsection{Initialization}
+At time $t = 0$, a population of $N_{\text{agents}} = 500$ agents is placed on a Barab\'{a}si-Albert scale-free graph generated with preferential attachment parameter $m_e = 3$. 
+
+The opinion vectors $\vec{O}_i \in [-1, 1]^K$ (for $K = 2$ issues) are initialized using a \textbf{bipolar split} to model a pre-polarized society:
+\begin{equation}
+    O_{i,d}(0) = \text{clip}\Big( \text{sgn}(\xi_i) \cdot U_i(0.4, 1.0) + \epsilon_{i,d},\, -1.0,\, 1.0 \Big)
+\end{equation}
+where $\xi_i \sim \mathcal{U}(-1, 1)$ is a uniform random scalar drawn for agent $i$ determining their ideological camp ($\text{sgn}(\xi_i) \in \{-1, +1\}$), $U_i(0.4, 1.0)$ is a uniform random draw representing their base camp intensity, and $\epsilon_{i,d} \sim \mathcal{N}(0, 0.05^2)$ is minor issue-specific individual noise. This splits the population roughly 50/50 into a left-pole camp and a right-pole camp.
+
+Each agent's salience vector $\vec{S}_i$ is drawn from a symmetric Dirichlet distribution:
+\begin{equation}
+    \vec{S}_i \sim \text{Dirichlet}(\vec{\alpha})
+\end{equation}
+where $\vec{\alpha} = [1, 1]^T$ for $K = 2$ issues, ensuring that $S_{i,d} \in [0, 1]$ and $\sum_{d=1}^K S_{i,d} = 1.0$.
+
+Cognitive entrenchment $\beta_i$ is drawn from a normal distribution and floored to prevent negative values:
+\begin{equation}
+    \beta_i = \max\Big( \beta_{\min},\, \nu_i \Big), \quad \nu_i \sim \mathcal{N}(\mu_{\beta},\, \sigma_{\beta}^2)
+\end{equation}
+with default values $\beta_{\min} = 0.5$, $\mu_{\beta} = 4.0$, and $\sigma_{\beta} = 1.5$.
+
+Symmetric dyadic trust on all network edges $(u, v) \in E$ is initialized to a uniform starting value:
+\begin{equation}
+    T_{uv}(0) = T_0 = 0.5
+\end{equation}
+Behavioral frustration is initialized to $F_i(0) = 0$ for all agents.
+
+\subsubsection{Dialogue Dynamics and Opinion Updates}
+When agent $i$ is activated, it selects a random active neighbor $j$ and receives their opinion. The interaction is processed through a multi-stage cognitive pipeline.
+
+\paragraph{Step 1: Salience-Weighted Opinion Alignment ($A_{ij}$)}
+The cognitive distance between the active agent $i$ and the sender $j$ is calculated as a salience-weighted dot product. The alignment is given by:
+\begin{equation}
+    A_{ij} = \sum_{d=1}^K O_{i,d} \cdot \left(\frac{S_{i,d} + S_{j,d}}{2}\right) \cdot O_{j,d}
+\end{equation}
+This alignment formulation captures the psychological reality that issues of mutual importance (high salience) contribute disproportionately to the perceived agreement or disagreement. Because opinions are bounded in $[-1, 1]$ and average saliences sum to $1.0$, $A_{ij} \in [-1, 1]$. An alignment of $+1$ indicates perfect agreement on highly salient issues, while $-1$ denotes absolute opposition.
+
+\paragraph{Step 2: Perceived Influence Weight ($w_{ij}$)}
+Following the BEBA framework \citep{Chen2021}, the baseline influence weight of agent $j$ on agent $i$ is determined by the agent's cognitive entrenchment and opinion alignment:
+\begin{equation}
+    w_{ij}^{\text{base}} = 1.0 + \beta_i A_{ij}
+\end{equation}
+When the novel **Dyadic Trust** system is enabled, the actual influence weight is modulated by the relational trust between the two agents, acting as a positive cognitive buffer:
+\begin{equation}
+    w_{ij} = 1.0 + \beta_i A_{ij} + \alpha T_{ij}
+\end{equation}
+where $\alpha \geq 0$ is the trust influence coefficient (`TRUST_INFLUENCE` = 0.3) and $T_{ij} \in [0, 1]$ is the current dyadic trust. The trust buffer represents the psychological mechanism of ``friends can argue'': a high level of interpersonal trust shifts the influence weight upward, preventing disagreements from immediately deteriorating into hostile backfires.
+
+\paragraph{Step 3: Social Judgment Zone Classification}
+The influence weight $w_{ij}$ is mapped to the corresponding Social Judgment Theory zone:
+\begin{equation}
+    \text{Zone}(w_{ij}) = \begin{cases}
+        1 \quad (\text{Latitude of Acceptance}) & \text{if } w_{ij} > \tau_{\text{assim}} \\
+        2 \quad (\text{Latitude of Non-Commitment}) & \text{if } 0.0 \leq w_{ij} \leq \tau_{\text{assim}} \\
+        3 \quad (\text{Latitude of Rejection}) & \text{if } w_{ij} < 0.0
+    \end{cases}
+\end{equation}
+where $\tau_{\text{assim}} = 0.3$ is the assimilation threshold.
+
+\paragraph{Step 4: Algorithmic Moderation (The Bridge Algorithm)}
+If the platform's Bridging Algorithm is enabled, the platform monitors interactions. When an interaction is classified as Zone 3 (backfire), the algorithm attempts to intervene. It succeeds with probability $E = 0.46$ (the bridging efficacy):
+\begin{equation}
+    w_{ij} \leftarrow 0.0, \quad \text{Zone}(w_{ij}) \leftarrow 2 \quad \text{with probability } E
+\end{equation}
+If intercepted, the backfire repulsion is neutralized, and the interaction is downgraded to Zone 2 (Ignore). Additionally, successful moderation provides a mental relief bonus, actively reducing the user's frustration (see below).
+
+\paragraph{Step 5: Opinion Update Rules}
+Depending on the final interaction zone, the opinion vector $\vec{O}_i$ is updated:
+\begin{itemize}
+    \item \textbf{Zone 1 (Assimilation):} The agent moves toward the sender's opinion using a modified DeGroot consensus update:
+    \begin{equation}
+        \vec{O}_i(t+1) = \text{clip}\left(\vec{O}_i(t) + \mu_{ij} \Big(\vec{O}_j(t) - \vec{O}_i(t)\Big),\, -1.0,\, 1.0\right)
+    \end{equation}
+    where the step size $\mu_{ij}$ is attenuated by the agent's cognitive entrenchment:
+    \begin{equation}
+        \mu_{ij} = \frac{w_{ij}}{1.0 + \beta_i}
+    \end{equation}
+    This ensures that more entrenched agents (high $\beta_i$) make smaller opinion adjustments, reflecting cognitive resistance.
+    
+    \item \textbf{Zone 2 (Non-Commitment):} The interaction is ignored. The opinion vector remains unchanged:
+    \begin{equation}
+        \vec{O}_i(t+1) = \vec{O}_i(t)
+    \end{equation}
+    
+    \item \textbf{Zone 3 (Backfire):} The agent experiences repulsive dissent and pushes its opinion vector away from the sender:
+    \begin{equation}
+        \vec{O}_i(t+1) = \text{clip}\left(\vec{O}_i(t) + \text{repulsion}_{ij} \Big(\vec{O}_i(t) - \vec{O}_j(t)\Big),\, -1.0,\, 1.0\right)
+    \end{equation}
+    where the repulsion step size is given by:
+    \begin{equation}
+        \text{repulsion}_{ij} = \frac{|w_{ij}|}{1.0 + \beta_i}
+    \end{equation}
+    This pushes agent $i$ further toward the extremes in reaction to agent $j$'s discrepant view.
+\end{itemize}
+
+\subsubsection{Behavioral Frustration and User Churn}
+Hostile interactions accumulate psychological cost, modeled as behavioral frustration $F_i$.
+\begin{itemize}
+    \item \textbf{Frustration Accrual (Backfire):} Every unmitigated backfire event (Zone 3) increments the agent's frustration:
+    \begin{equation}
+        F_i(t+1) = F_i(t) + 1
+    \end{equation}
+    \item \textbf{Frustration Healing (Assimilation):} Constructive, assimilative interactions (Zone 1) relieve psychological tension, allowing the agent to heal at a constant rate $H = 1$:
+    \begin{equation}
+        F_i(t+1) = \max\Big(0,\, F_i(t) - H\Big)
+    \end{equation}
+    \item \textbf{Moderation Relief Bonus:} If a backfire interaction is successfully intercepted by the bridging algorithm, the user is spared the backfire and receives an enhanced mental relief bonus $B_{hb} = 2$:
+    \begin{equation}
+        F_i(t+1) = \max\Big(0,\, F_i(t) - B_{hb}\Big)
+    \end{equation}
+\end{itemize}
+
+At the end of the interaction, the active status is updated. If an agent's cumulative frustration exceeds the churn threshold $T_c = 15$, the agent permanently churns (exits the platform):
+\begin{equation}
+    \text{Active}_i(t+1) = \begin{cases}
+        \text{False} & \text{if } F_i(t+1) > T_c \\
+        \text{Active}_i(t) & \text{otherwise}
+    \end{cases}
+\end{equation}
+Once churned, the agent is flagged as inactive, ceases all step activities, and is excluded from future interactions and revenue calculations.
+
+\subsubsection{Dyadic Trust Co-evolution}
+When dyadic trust is enabled, the symmetric trust weight $T_{ij}$ on the edge $(i, j)$ co-evolves with interaction outcomes:
+\begin{equation}
+    T_{ij}(t+1) = \begin{cases}
+        \min\Big(1.0,\, T_{ij}(t) + \delta_+\Big) & \text{if } \text{Zone}(w_{ij}) = 1 \text{ (Assimilation)} \\
+        \max\Big(0.0,\, T_{ij}(t) - \delta_-\Big) & \text{if } \text{Zone}(w_{ij}) = 3 \text{ (Backfire)} \\
+        T_{ij}(t) & \text{if } \text{Zone}(w_{ij}) = 2 \text{ (Ignore)}
+    \end{cases}
+\end{equation}
+where $\delta_+ = 0.02$ represents the slow trust gain upon agreement, and $\delta_- = 0.05$ represents the rapid trust loss upon backfire conflict. The ratio of trust loss to trust gain ($\delta_- / \delta_+ = 2.5$) reflects Slovic's empirical observation of trust asymmetry: relationships are fragile, and trust is destroyed much faster than it is built.
+
+To capture the fading nature of social connections in the absence of active engagement (``out of sight, out of mind''), a passive relationship decay is applied network-wide at the end of each tick:
+\begin{equation}
+    T_{uv}(t+1) = T_{uv}(t) \cdot (1 - \lambda)
+\end{equation}
+for all edges $(u, v) \in E$, where $\lambda = 0.001$ is the passive decay rate.
+
+\subsubsection{Platform Revenue}
+The social media platform generates advertising revenue at each step $t$ as a function of the number of active users and the global ideological climate. Crucially, the platform is subject to a **Brand Safety Penalty** if global polarization exceeds a critical threshold:
+\begin{equation}
+    R(t) = N_{\text{active}}(t) \cdot r_{\text{ad}} \cdot M_{\text{safety}}(t)
+\end{equation}
+where $N_{\text{active}}(t)$ is the count of active agents at step $t$, $r_{\text{ad}} = \$1.00$ is the base ad rate per user per step, and $M_{\text{safety}}(t)$ is a step-function multiplier representing advertiser brand safety guidelines:
+\begin{equation}
+    M_{\text{safety}}(t) = \begin{cases}
+        M_{\text{safe}} = 1.0 & \text{if } \sigma(t) < \tau_{\text{cliff}} \\
+        M_{\text{unsafe}} = 0.4 & \text{if } \sigma(t) \geq \tau_{\text{cliff}}
+    \end{cases}
+\end{equation}
+where $\tau_{\text{cliff}} = 0.6$ is the polarization cliff threshold. The global polarization $\sigma(t)$ is calculated as the root-mean-square (RMS) of the standard deviations across all active opinion dimensions:
+\begin{equation}
+    \sigma(t) = \sqrt{\frac{1}{K} \sum_{d=1}^K \text{Var}\Big(\{O_{i,d}(t) : i \in \mathcal{A}(t)\}\Big)}
+\end{equation}
+where $\mathcal{A}(t) = \{i \in V : \text{Active}_i(t) = \text{True}\}$ is the set of active agents. This multidimensional RMS formulation avoids the ``Data Flattening'' trap: if we were to compute the variance of a flattened opinion vector or the standard deviation of issue-wise means, extreme multidimensional views (e.g., an agent at $[+1.0, -1.0]$) would falsely cancel out, masking systemic radicalization. By computing standard deviation within each issue dimension independently and taking their RMS, we accurately capture the systemic dispersion of opinions.
+
+\begin{table}[htbp]
+\centering
+\caption{Model Parameters and Default Values}
+\label{tab:parameters}
+\begin{tabular}{llcl}
+\toprule
+\textbf{Parameter Symbol} & \textbf{Description} & \textbf{Default Value} & \textbf{Source / Rationale} \\
+\midrule
+$N_{\text{agents}}$ & Population size & $500$ & Config.py standard pop. size \\
+$m_e$ & BA network attachment parameter & $3$ & Scale-free social degree distribution \\
+$K$ & Number of opinion dimensions & $2$ & Multidimensional issue space \\
+$\beta_{\text{mean}}$ & Mean of cognitive entrenchment & $4.0$ & High entrenchment social media bias \\
+$\beta_{\text{std}}$ & SD of cognitive entrenchment & $1.5$ & Cognitive heterogeneity in population \\
+$\beta_{\min}$ & Minimum entrenchment floor & $0.5$ & Prevent negative cognitive resistance \\
+$k_{\text{step}}$ & Dialogue partners selected per step & $1$ & Micro-interaction conversational model \\
+$\tau_{\text{assim}}$ & Assimilation threshold & $0.3$ & Social Judgment Theory threshold \\
+$T_c$ & Churn frustration threshold & $15$ & Toxic churn tolerance capacity \\
+$H$ & Natural frustration healing rate & $1$ & Cognitive cooling per positive contact \\
+$B_{hb}$ & Bridge moderation healing bonus & $2$ & Active relief under algorithmic safety \\
+$r_{\text{ad}}$ & Base advertising rate per step & $\$1.00$ & Baseline monetization rate \\
+$\tau_{\text{cliff}}$ & Brand safety polarization cliff & $0.6$ & Advertiser flight tipping point \\
+$M_{\text{safe}}$ & Brand safe revenue multiplier & $1.0$ & Normal ad monetization \\
+$M_{\text{unsafe}}$ & Brand unsafe revenue multiplier & $0.4$ & $60\%$ discount due to toxic environment \\
+$E$ & Bridging algorithm efficacy & $0.46$ & $46\%$ moderation success probability \\
+$T_0$ & Initial dyadic trust weight & $0.5$ & Relational neutrality starting state \\
+$\alpha$ & Trust buffer influence coefficient & $0.3$ & Disagreement buffering coefficient \\
+$\delta_+$ & Trust building step size (gain) & $0.02$ & Slow relational capital accumulation \\
+$\delta_-$ & Trust erosion step size (loss) & $0.05$ & Slovic relational fragility parameter \\
+$\lambda$ & Passive trust decay rate & $0.001$ & Under-maintenance erosion rate \\
+$t_{\max}$ & Maximum simulation step limit & $200$ & Conversational equilibrium epoch \\
+\bottomrule
+\end{tabular}
+\end{table}
