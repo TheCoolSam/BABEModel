@@ -168,7 +168,7 @@ When the novel **Dyadic Trust** system is enabled, the actual influence weight i
 where $\alpha \geq 0$ is the trust influence coefficient (`TRUST_INFLUENCE` = 0.3) and $T_{ij} \in [0, 1]$ is the current dyadic trust. The trust buffer represents the psychological mechanism of ``friends can argue'': a high level of interpersonal trust shifts the influence weight upward, preventing disagreements from immediately deteriorating into hostile backfires.
 
 \paragraph{Step 3: Social Judgment Zone Classification}
-The influence weight $w_{ij}$ is mapped to the corresponding Social Judgment Theory zone:
+While the original BEBA model of \citet{Chen2021} is a collective, synchronous DeGroot averaging process where the backfire effect is implicitly driven by negative edge weights, the Dynamic-BABE framework adapts this cognitive logic into a local, pairwise interaction paradigm. To model individual-level behavioral outcomes (such as frustration, churn, and targeted algorithmic interventions), we operationalize these interactions using Social Judgment Theory \citep{Sherif1961, Jager2005}. The perceived influence weight $w_{ij}$ is mapped directly to one of three discrete latitudes:
 \begin{equation}
     \text{Zone}(w_{ij}) = \begin{cases}
         1 \quad (\text{Latitude of Acceptance}) & \text{if } w_{ij} > \tau_{\text{assim}} \\
