@@ -279,7 +279,8 @@ where $\mathcal{A}(t) = \{i \in V : \text{Active}_i(t) = \text{True}\}$ is the s
 \centering
 \caption{Model Parameters and Default Values}
 \label{tab:parameters}
-\begin{tabular}{llcl}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{2.8cm} p{5.5cm} c p{6cm}}
 \toprule
 \textbf{Parameter Symbol} & \textbf{Description} & \textbf{Default Value} & \textbf{Source / Rationale} \\
 \midrule
@@ -306,5 +307,6 @@ $\delta_-$ & Trust erosion step size (loss) & $0.05$ & Slovic relational fragili
 $\lambda$ & Passive trust decay rate & $0.001$ & Under-maintenance erosion rate \\
 $t_{\max}$ & Maximum simulation step limit & $200$ & Conversational equilibrium epoch \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}

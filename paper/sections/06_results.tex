@@ -47,6 +47,7 @@ Comparing these two distributions of differences using Mann-Whitney $U$ tests re
 \centering
 \caption{Bridge $\times$ Trust Interaction Analysis (Seed-Paired Differences)}
 \label{tab:interaction}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Metric} & \textbf{Mean Effect Alone ($\Delta_{\text{alone}}$)} & \textbf{Mean Effect w/Trust ($\Delta_{\text{with trust}}$)} & \textbf{Interaction Cohen's $d$} & \textbf{U-statistic} & \textbf{$p$-value (adjusted)} \\
@@ -61,7 +62,8 @@ Polarization & $+0.0353$ & $+0.0322$ & $-0.0887$ & $454.0$ & $1.0000$ \\
 Revenue & $+\$77.60$ & $+\$76.04$ & $-0.3508$ & $550.5$ & $1.0000$ \\
 Trust Segregation & $0.0000$ & $+1.9854$ & $+0.0902$ & $240.0$ & $0.0093$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 \paragraph{Active Users, Frustration, and Churn:} The interaction effects on physical user retention metrics (Active Users, Churn Rate, and Avg. Frustration) and financial performance (Revenue) are statistically non-significant after Bonferroni correction ($p_{\text{adjusted}} = 1.0000$). The bridging algorithm retains its powerful physical and economic protective effects regardless of whether trust is enabled: it consistently rescues approximately $190$ to $194$ users from churning, decreases frustration by $\approx 0.39$, and preserves $\approx \$76.00$ in step-wise revenue.
