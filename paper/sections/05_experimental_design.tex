@@ -1,19 +1,29 @@
-We map the co-evolutionary dynamics above with a $2 \times 2$ factorial design crossing the Bridging Algorithm and Dyadic Trust co-evolution:
+We map the processes above with a $2 \times 2$ design crossing the Bridging Algorithm and dyadic trust:
 \begin{enumerate*}
-    \item \textbf{Baseline (Bridge OFF, Trust OFF):} Biased assimilation and entrenchment under static neutral trust ($T_{ij} = 0.5$).
-    \item \textbf{Bridge Only (Bridge ON, Trust OFF):} Bridging active; trust static.
+    \item \textbf{Baseline (Bridge OFF, Trust OFF):} Biased assimilation under static neutral trust ($T_{ij} = 0.5$).
+    \item \textbf{Bridge Only (Bridge ON, Trust OFF):} Bridging on; trust fixed.
     \item \textbf{Trust Only (Bridge OFF, Trust ON):} Trust co-evolves; no bridging.
-    \item \textbf{Full Model (Bridge ON, Trust ON):} Bridging and trust co-evolve together.
+    \item \textbf{Full Model (Bridge ON, Trust ON):} Both mechanisms active.
 \end{enumerate*}
 
 \subsubsection{Model Hyperparameters and Topology}
-The model embeds $N = 500$ agents in a Barab{\'a}si--Albert network~\citep{Barabasi1999} with attachment parameter $m = 3$. Opinions occupy $K = 2$ issues under bipolar initialization: each agent receives pole $\pi_i \in \{-1,+1\}$ with equal probability, and each issue is set to $\pi_i \cdot U(0.4,1.0)$ (clipped to $[-1,1]$), so expected absolute extremity is $0.7$.
+The model places $N = 500$ agents on a Barab{\'a}si--Albert network~\citep{Barabasi1999} with $m = 3$. Opinions live in $K = 2$ issues with bipolar initialization: pole $\pi_i \in \{-1,+1\}$ with equal probability, and each issue set to $\pi_i \cdot U(0.4,1.0)$ (clipped to $[-1,1]$).
 
-Cognitive resistance $\beta_i$ is drawn $\mathcal{N}(\mu_{\beta}=4.0, \sigma_{\beta}=1.5)$ with floor $\beta_{\min}=0.5$. When enabled, trust shifts influence by $\gamma_T=0.3$, gains $\delta_+=0.02$ on assimilation, loses $\delta_-=0.05$ on backfire, and decays at $\lambda=0.001$ per step on all edges after interactions. Bridging intercepts Latitude-of-Rejection events with efficacy $E=46\%$ and grants a two-point frustration relief bonus.
+Entrenchment $\beta_i \sim \mathcal{N}(4.0, 1.5)$ with floor $0.5$. When trust is on, influence shifts by $\gamma_T=0.3$, gains $\delta_+=0.02$ on assimilation, loses $\delta_-=0.05$ on backfire, and decays at $\lambda=0.001$ per step. Bridging intercepts rejection-zone events with efficacy $E=0.46$ and applies a two-point frustration relief.
 
-We run $R=30$ replications per condition for $S=200$ steps. Reproducibility uses base seed $42$; run $i$ uses seed $42+i$, so network structure and stochastic draws are reconstructible for each replicate.
+We run $R=30$ replications per condition for $S=200$ steps. Run $i$ uses seed $42+i$.
+
+\subsubsection{Stylized Facts and Qualitative Targets}
+Parameters are literature-motivated, not fitted to a proprietary platform log. We instead check that default Dynamic-BABE recovers directional patterns reported in related work:
+\begin{description*}
+    \item[Backfire under opposing exposure.] Rejection-zone contact moves opinions apart~\citep{Bail2018, Sherif1961}.
+    \item[Feed regime vs.\ deep attitudes.] Bridging changes exit/retention strongly while polarization stays high or rises, consistent in spirit with feed experiments where ranking shifts behavior more than core attitudes~\citep{Guess2023}.
+    \item[Fragile trust.] Gain/loss asymmetry ($\delta_-/\delta_+ = 2.5$) follows~\citet{Slovic1993} and yields trust segregation when trust is enabled.
+    \item[Exit under conflict.] Frustration-driven churn implements Hirschmanian exit~\citep{Hirschman1970} under unmoderated conflict.
+\end{description*}
+These are qualitative anchors, not quantitative calibration targets.
 
 \subsubsection{Statistical Methodology}
-We analyze final-step metrics across all $120$ runs with non-parametric methods. Pairwise condition contrasts use two-sided Mann--Whitney $U$ tests~\citep{Mann1947} with Bonferroni correction across the full pairwise family, and Cohen's $d$~\citep{Cohen1988} for standardized magnitude (negligible $|d|<0.2$; small $<0.5$; medium $<0.8$; large $\ge 0.8$). We also report $95\%$ bootstrap confidence intervals ($10{,}000$ resamples).
+Final-step metrics across $120$ runs use non-parametric tests. Pairwise contrasts use two-sided Mann--Whitney $U$~\citep{Mann1947} with Bonferroni correction and Cohen's $d$~\citep{Cohen1988}. We also report $95\%$ bootstrap intervals ($10{,}000$ resamples).
 
-For Bridge $\times$ Trust moderation, we compute seed-paired effects $\Delta_{\mathrm{alone}}=(\mathrm{Bridge\ Only})-(\mathrm{Baseline})$ and $\Delta_{\mathrm{with\ trust}}=(\mathrm{Full\ Model})-(\mathrm{Trust\ Only})$, then apply a Wilcoxon signed-rank test to $\Delta_{\mathrm{with\ trust}}-\Delta_{\mathrm{alone}}$, with Bonferroni correction across interaction metrics. This paired procedure matches the shared-seed design more closely than an unpaired rank-sum test on the two effect vectors.
+For Bridge $\times$ Trust moderation we form seed-paired effects $\Delta_{\mathrm{alone}}=(\mathrm{Bridge\ Only})-(\mathrm{Baseline})$ and $\Delta_{\mathrm{with\ trust}}=(\mathrm{Full\ Model})-(\mathrm{Trust\ Only})$, then apply a Wilcoxon signed-rank test to their difference, with Bonferroni correction across metrics.

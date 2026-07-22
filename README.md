@@ -82,6 +82,23 @@ $env:PYTHONUNBUFFERED="1"
 Optional knobs: `--workers=2` `--iters=5` (or `--quick` for 3 reps).
 Default sensitivity parallelism is capped at 2 cores so Chrome/Cursor stay usable.
 
+---
+
+## Strength-upgrade experiments (Colab / SSH)
+
+Mechanism ablations, baseline comparisons, and topology robustness (survive closing the laptop if the job is remote):
+
+```powershell
+python -m experiments.ablations --laptop --iters=20
+python -m experiments.baselines --laptop --iters=20
+python -m experiments.topology_robustness --laptop --iters=15
+```
+
+- Colab: open `notebooks/colab_run_experiments.ipynb`
+- SSH: `bash scripts/remote_tmux.sh 20 4` then `tmux attach -t babe_experiments`
+- Checkpoints: `output/checkpoints/*_partial.csv`
+
+CoMSES deposit steps: see `docs/COMSES_DEPOSIT.md`.
 
 Before or upon acceptance, deposit a release on [CoMSES Net](https://www.comses.net/):
 

@@ -1,7 +1,7 @@
 % paper/sections/06_results.tex
 % Results Section
 
-Our $2\times2$ factorial simulation experiments yield clear quantitative patterns. By crossing the platform's \textbf{Bridging Algorithm} (ON vs. OFF) with the co-evolutionary \textbf{Dyadic Trust} framework (ON vs. OFF), we run $30$ independent simulations per condition---each running for $200$ steps. Reproducibility uses base seed $42$, with run $i$ initialized at seed $42+i$. To compare these states, we employ two-sided, non-parametric Mann-Whitney $U$ tests backed by Bonferroni corrections, and compute Cohen's $d$ to quantify standardized effect sizes \citep{Cohen1988}. Large Cohen's $d$ values for churn and revenue reflect nearly non-overlapping condition distributions rather than subtle mean shifts; we therefore emphasize absolute mean differences alongside standardized effects.
+Our $2\times2$ experiments cross bridging (ON/OFF) with dyadic trust (ON/OFF). Each cell has $30$ runs of $200$ steps with seed $42+i$ for run $i$. We compare final metrics with Mann--Whitney $U$ tests (Bonferroni-corrected) and Cohen's $d$~\citep{Cohen1988}. Very large $d$ values for churn and revenue reflect nearly separated distributions; we therefore also report absolute means.
 
 \subsection{The Polarization Paradox: Short-Term Monetization vs. Long-Term Alignment}
 We begin by comparing the \textbf{Baseline} and \textbf{Bridge Only} conditions, isolating the impact of algorithmic feed moderation when network trust remains static. The simulations demonstrate a tension between a platform's short-term financial retention and long-term ideological alignment---a structural deadlock we term the \textbf{Polarization Paradox}.
@@ -111,3 +111,33 @@ Similarly, under the \textbf{Full Model} (Bridge ON, Trust ON), opinion-weighted
 This shift occurs because bridging intercepts many extreme backfires and dampens local repulsion. Global polarization can remain high because dogmatic users who would otherwise exit are retained, while local triangles become slightly less homogeneous.
 
 Lower clustering should not be read as systemic resolution. Agents may remain connected in triangles while interpersonal trust stays partitioned and many cross-cutting channels are inactive.
+
+\subsection{Mechanism Checks}
+To isolate what produces the paradox, we ran paired ablations ($20$ seeds; Figure~\ref{fig:ablations}). Relative to an unmoderated reference (mean churn $38.66\%$, polarization $0.9579$), standard intercept bridging (M0) cuts churn to $0.39\%$ while raising polarization to $0.9901$. A placebo that heals frustration without intercepting opinion change (M1) lowers churn only to $5.82\%$ and leaves polarization high ($0.9924$): retention help without opinion intercept is weaker than full bridging. Removing the frustration-healing bonus while keeping intercept (M3) raises churn to $20.53\%$, so healing contributes to retention but is not the whole story. Dropping rejection events entirely (M2) matches intercept on these aggregate KPIs under our defaults. Disabling passive trust decay in the Full Model (M4) still yields near-zero churn and high polarization. Setting the brand-safety multiplier to $1.0$ (M5) leaves polarization and churn unchanged but raises revenue to the full active-user scale, confirming that the cliff mainly scales revenue rather than the opinion paradox.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/fig_ablations.png}
+    \caption{Mechanism ablations ($20$ seeds): mean Polarization, Churn Rate, and Revenue by condition. Error bars show standard deviations.}
+    \label{fig:ablations}
+\end{figure}
+
+\subsection{Baseline Model Comparison}
+On the same BA networks and seeds, simple Hegselmann--Krause bounded confidence yields lower final polarization (mean $0.6991$) and no churn pathway. A lightweight biased-assimilation update without Social Judgment zones or exit also stays near-extreme (mean polarization $0.9900$) with zero churn. Dynamic-BABE Baseline is distinctive in jointly producing high polarization \emph{and} substantial exit (churn $38.66\%$). Bridging therefore acts on a model that already links conflict to leaving---a coupling the simpler baselines omit (Figure~\ref{fig:baselines}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.55\textwidth]{figures/fig_baselines_polarization.png}
+    \caption{Final polarization under Dynamic-BABE Baseline, Hegselmann--Krause, and biased DeGroot-style updates ($20$ seeds).}
+    \label{fig:baselines}
+\end{figure}
+
+\subsection{Topology Robustness}
+Repeating Bridge OFF/ON on Watts--Strogatz graphs ($k=6$, $p=0.1$; $15$ seeds) preserves the qualitative paradox: bridging cuts churn from $36.04\%$ to $0.17\%$ while polarization rises from $0.9730$ to $0.9896$, comparable in direction to Barab\'{a}si--Albert under the same seeds (Figure~\ref{fig:topology}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/fig_topology_robustness.png}
+    \caption{Bridge OFF/ON contrasts on Barab\'{a}si--Albert vs.\ Watts--Strogatz topologies ($15$ seeds).}
+    \label{fig:topology}
+\end{figure}

@@ -1,32 +1,30 @@
 % paper/sections/07_discussion.tex
-% Discussion Section
 
-Our experiments describe a co-evolutionary system in which algorithmic filters, cognitive biases, and dyadic relationships interact. Here we interpret the Polarization Paradox through Exit--Voice--Loyalty, discuss the double-edged role of trust, outline design implications, report a brief robustness check, and note limitations.
+We interpret the Polarization Paradox with Exit--Voice--Loyalty, discuss trust, state conditional implications, summarise robustness (including mechanism and topology checks), and list limitations.
 
-\subsection{The Polarization Paradox: An Exit-Voice-Loyalty Analysis}
-\citet{Hirschman1970}'s \textit{Exit, Voice, and Loyalty} framework clarifies the paradox. When quality decays---here, through rising ideological conflict---members may \textbf{Exit} (leave) or exercise \textbf{Voice} (debate and repair).
+\subsection{The Polarization Paradox: Exit, Voice, and Loyalty}
+\citet{Hirschman1970} distinguishes \textbf{Exit} (leave) from \textbf{Voice} (stay and try to repair). In the Baseline, rejection-zone contact raises frustration and many agents exit. Exit is costly for the platform, but it also removes some extreme agents from the active population.
 
-In the unmoderated Baseline, entrenched agents encounter outgroup opinions that land in the Latitude of Rejection, triggering backfires and frustration. Lacking an effective repair channel, many choose \textbf{Exit} and churn. That exit is costly for the platform, but it also removes radical agents and can clip the tails of the opinion distribution.
+Bridging intercepts many backfires and reduces exit. Retention and revenue improve. The same intervention often replaces rejection with Zone~2 silence rather than constructive engagement, so it does not build Voice. Closing exit without opening repair can leave extreme agents active, sustaining high polarization while churn falls.
 
-Bridging targets the economic threat by intercepting many backfires, closing the \textbf{Exit} pathway for frustrated users. Retention and revenue improve. The intervention does not, however, cultivate \textbf{Voice}: rejection-zone events are often replaced by Zone~2 silence rather than constructive engagement. This containment is not Hirschmanian \textbf{Loyalty}; it is synthetic retention without a parallel channel for repair. Closing exit while blocking voice can trap extreme agents inside the network, sustaining high polarization even as churn falls.
+\subsection{Dyadic Trust}
+Trust is double-edged. Agreement raises ingroup trust (mean $0.9814$ in Trust Only); conflict and asymmetry ($\delta_-/\delta_+ = 2.5$) following~\citet{Slovic1993} collapse outgroup trust (mean $0.0415$). With passive decay, trust segregates (mean ratio $35.61$; median $28.58$). These patterns come mainly from enabling trust co-evolution, not from the bridging contrast that defines the paradox.
 
-\subsection{The Double-Edged Sword of Dyadic Trust}
-Dynamic trust cuts both ways. Like-minded agents accumulate relational capital ($\delta_+ = 0.02$), raising mean ingroup trust to $0.9814$ and buffering within-camp disagreement. Across camps, asymmetry ($\delta_- / \delta_+ = 2.5$) following \citet{Slovic1993} depletes outgroup trust to a mean of $0.0415$ in the Trust Only condition. With passive decay ($\lambda = 0.001$), the network segregates (mean Trust Segregation Ratio $35.61$; median $28.58$). These relational outcomes are primarily attributable to enabling trust co-evolution, not to the bridging contrast that defines the Polarization Paradox.
+\subsection{Conditional Implications}
+Curation systems often optimise engagement, retention, and brand safety. Our results suggest those objectives need not track cohesion. If designers also care about cross-camp relational capital, suppression alone is an incomplete instrument. That statement is a conditional implication from a theoretical laboratory, not a prescription for any named platform.
 
-\subsection{Platform Design and Architectural Implications}
-Many curation systems optimize engagement, retention, and brand safety. Suppression can treat behavioral symptoms (outrage, exit) while leaving entrenchment and fragile trust intact. Our results suggest that retention gains need not imply cohesion gains. Multi-objective designs that also track cross-camp relational capital---for example, connecting users via shared non-political salience before exposing political disagreement---offer a constructive alternative to pure avoidance. These implications are normative design hypotheses, not empirical prescriptions for any specific platform.
+\subsection{Robustness}
+OFAT sweeps over $\beta_{\mathrm{mean}}$, $\tau_{\mathrm{assim}}$, $T_c$, $K$, $\gamma_T$, $E$, and $m_e$ (five replications per cell; $N=400$) preserve the qualitative paradox at interior points: bridging cuts churn and typically raises final polarization. Exceptions are identifiable boundaries (very low $\beta$; $E=0$; near-perfect $E=1$). See \texttt{sensitivity.py} and \texttt{output/sensitivity\_results.csv}.
 
-\subsection{Robustness to Parameter Variation}
-We conducted one-factor-at-a-time (OFAT) sensitivity sweeps over $\beta_{\mathrm{mean}}$, $\tau_{\mathrm{assim}}$, $T_c$, $K$, $\gamma_T$, $E$, and $m_e$ (five replications per cell; $N=400$ runs; see \texttt{sensitivity.py}, \texttt{output/sensitivity\_results.csv}, and the generated sensitivity figures). Across nearly all interior sweep points, the qualitative Polarization Paradox pattern holds: bridging sharply reduces churn while failing to reduce---and typically elevating---final polarization. Absolute levels of churn and polarization shift with parameters (especially $\beta_{\mathrm{mean}}$, $T_c$, $E$, and $m_e$), but directional bridge-versus-baseline contrasts reverse only at identifiable boundaries. At very low entrenchment ($\beta_{\mathrm{mean}}\in\{1,2\}$), both conditions remain near-consensus with negligible churn, so the paradox is undefined rather than contradicted. Setting bridge efficacy to $E=0$ yields a null intervention (churn essentially unchanged). At the opposite pole, $E=1.0$ retains the churn reduction but collapses polarization---suggesting that only near-perfect suppression, not the moderate bridging used in the main design, dissolves the paradox on the opinion axis. Full numerical tables and per-parameter figures are available in the replication repository.
+Additional checks (see Results) show that (i) placebo retention without opinion intercept does not reproduce the paradox in the same way as intercept bridging, (ii) Dynamic-BABE differs from simple HK / biased-DeGroot baselines in linking suppression to exit, and (iii) the Bridge OFF/ON contrast remains directionally similar on Watts--Strogatz as on Barab\'{a}si--Albert graphs under our defaults.
 
 \subsection{Limitations and Future Work}
-Although Dynamic-BABE provides a transparent theoretical laboratory, several boundaries remain:
 \begin{enumerate*}
-    \item \textbf{Symmetric Trust:} We assume $T_{ij} = T_{ji}$. Directed, asymmetric trust is an important extension.
-    \item \textbf{Static Undirected Topology:} Barab\'{a}si--Albert graphs are undirected and fixed. Real platforms often use directed follower ties with higher clustering and ongoing rewiring. Absolute clustering levels should be read as stylized signals. Directed hubs that broadcast without reciprocal friction may alter polarization and churn.
-    \item \textbf{Low-Dimensional Issue Space:} We use $K=2$. Higher-dimensional issue spaces and cross-cutting cleavages may change global dynamics.
-    \item \textbf{Pole Classification Edge Case:} Ingroup/outgroup metrics use $\mathrm{sign}(\overline{O}_i)$. Agents with mean opinion exactly zero form a distinct zero pole; such cases are uncommon under bipolar initialization but remain a modeling limitation.
-    \item \textbf{Empirical Calibration:} Parameters are literature-motivated, not fitted to a named platform dataset. Field calibration remains future work.
-    \item \textbf{Stylized Bridging and Revenue:} The bridge filter and brand-safety multiplier are abstractions for theoretical clarity, not audited replicas of production ranking or ad systems.
+    \item \textbf{Symmetric trust:} We assume $T_{ij}=T_{ji}$.
+    \item \textbf{Static undirected topology:} BA/WS graphs are undirected and fixed; real follower graphs are directed and rewiring.
+    \item \textbf{Low-dimensional issues:} $K=2$.
+    \item \textbf{Pole edge case:} $\mathrm{sign}(\overline{O}_i)=0$ is a distinct pole (rare under bipolar init).
+    \item \textbf{No field fit:} Parameters are not estimated from a named platform dataset.
+    \item \textbf{Stylized bridge and revenue:} Abstractions for theory, not audited production systems.
 \end{enumerate*}
-These limits notwithstanding, the framework offers a reproducible basis for studying how suppression and fragile trust jointly shape polarization and retention.
+Despite these limits, the model is a transparent testbed for how suppression and fragile trust jointly shape polarization and retention.

@@ -34,6 +34,17 @@ UNSAFE_AD_MULTIPLIER = 0.4
 # The Bridge Algorithm
 ENABLE_BRIDGE = False
 BRIDGE_EFFICACY = 0.46
+# Ablation / experiment hooks (defaults preserve published 2x2 behaviour)
+# bridge_mode: intercept | drop | heal_only
+BRIDGE_MODE = "intercept"
+# opinion_model: dynamic_babe | hk | degroot_bias
+OPINION_MODEL = "dynamic_babe"
+# topology: ba | watts_strogatz
+TOPOLOGY = "ba"
+WS_K = 6
+WS_P = 0.1
+HK_EPSILON = 0.3
+DISABLE_TRUST_DECAY = False
 
 # Dyadic Trust (NOVEL)
 # Per-edge trust variable T_ij ∈ [0, 1] that co-evolves with opinions.

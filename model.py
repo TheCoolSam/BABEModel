@@ -58,14 +58,15 @@ def compute_revenue(model):
     """
     Revenue step-function:
       Base = Sum(Active Users) * Base Ad Rate
-      If sigma >= 0.6 -> Ad Rate drops to 40 % (Brand Safety Penalty).
+      If sigma >= cliff -> apply unsafe ad multiplier (brand-safety penalty).
     """
     active_count = len(_active_agents(model))
     sigma = compute_polarization(model)
+    unsafe = getattr(model, "unsafe_ad_multiplier", cfg.UNSAFE_AD_MULTIPLIER)
     multiplier = (
         cfg.SAFE_AD_MULTIPLIER
         if sigma < cfg.POLARIZATION_CLIFF
-        else cfg.UNSAFE_AD_MULTIPLIER
+        else unsafe
     )
     return active_count * cfg.BASE_AD_RATE * multiplier
 
@@ -257,6 +258,17 @@ class SocialNetworkModel(Model):
         enable_bridge=cfg.ENABLE_BRIDGE,
         enable_trust=cfg.ENABLE_TRUST,
         seed=cfg.RANDOM_SEED,
+        bridge_efficacy=None,
+        bridge_healing_bonus=None,
+        trust_decay=None,
+        unsafe_ad_multiplier=None,
+        topology=None,
+        ws_k=None,
+        ws_p=None,
+        bridge_mode=None,
+        disable_trust_decay=None,
+        opinion_model=None,
+        hk_epsilon=None,
     ):
         super().__init__()
 
@@ -269,15 +281,56 @@ class SocialNetworkModel(Model):
         self.rng = np.random.default_rng(seed)
         self._seed = seed
 
-        # Parameters
+        # Parameters (instance overrides keep multiprocessing workers isolated)
         self.num_agents = num_agents
         self.enable_bridge = enable_bridge
         self.enable_trust = enable_trust
-
-        # Network topology: Barabasi-Albert scale-free graph
-        self.G = nx.barabasi_albert_graph(
-            n=num_agents, m=ba_m, seed=int(self.rng.integers(0, 2**31))
+        self.bridge_efficacy = (
+            cfg.BRIDGE_EFFICACY if bridge_efficacy is None else bridge_efficacy
         )
+        self.bridge_healing_bonus = (
+            cfg.BRIDGE_HEALING_BONUS
+            if bridge_healing_bonus is None
+            else bridge_healing_bonus
+        )
+        self.trust_decay = cfg.TRUST_DECAY if trust_decay is None else trust_decay
+        self.unsafe_ad_multiplier = (
+            cfg.UNSAFE_AD_MULTIPLIER
+            if unsafe_ad_multiplier is None
+            else unsafe_ad_multiplier
+        )
+        self.topology = (topology or getattr(cfg, "TOPOLOGY", "ba")).lower()
+        self.ws_k = cfg.WS_K if ws_k is None else ws_k
+        self.ws_p = cfg.WS_P if ws_p is None else ws_p
+        self.bridge_mode = (
+            bridge_mode or getattr(cfg, "BRIDGE_MODE", "intercept")
+        ).lower()
+        self.disable_trust_decay = (
+            getattr(cfg, "DISABLE_TRUST_DECAY", False)
+            if disable_trust_decay is None
+            else bool(disable_trust_decay)
+        )
+        self.opinion_model = (
+            opinion_model or getattr(cfg, "OPINION_MODEL", "dynamic_babe")
+        ).lower()
+        self.hk_epsilon = (
+            cfg.HK_EPSILON if hk_epsilon is None else hk_epsilon
+        )
+
+        # Network topology
+        g_seed = int(self.rng.integers(0, 2**31))
+        if self.topology in ("watts_strogatz", "ws"):
+            k = int(self.ws_k)
+            if k % 2 == 1:
+                k += 1
+            k = max(2, min(k, num_agents - 1 if num_agents > 1 else 2))
+            self.G = nx.watts_strogatz_graph(
+                n=num_agents, k=k, p=float(self.ws_p), seed=g_seed
+            )
+        else:
+            self.G = nx.barabasi_albert_graph(
+                n=num_agents, m=ba_m, seed=g_seed
+            )
 
         # ------------------------------------------------------------ #
         # NOVEL: Initialise symmetric dyadic trust on every edge
@@ -336,14 +389,13 @@ class SocialNetworkModel(Model):
 
     def interact(self, agent):
         """
-        Select a random active neighbour and run the full
-        Chen -> Social Judgment -> DeGroot pipeline.
+        Select a random active neighbour and run the configured
+        opinion-update pipeline (Dynamic-BABE, HK, or degroot_bias).
         """
         neighbours = list(self.G.neighbors(agent.unique_id))
         if not neighbours:
             return
 
-        # Filter to active neighbours only
         active_neighbours = [
             self.G.nodes[nid]["agent"]
             for nid in neighbours
@@ -352,111 +404,107 @@ class SocialNetworkModel(Model):
         if not active_neighbours:
             return
 
-        # Sample up to INTERACTIONS_PER_STEP neighbours
         k = min(cfg.INTERACTIONS_PER_STEP, len(active_neighbours))
         partners = self.rng.choice(active_neighbours, size=k, replace=False)
 
         for partner in partners:
-            self._process_interaction(agent, partner)
+            if self.opinion_model == "hk":
+                self._process_hk(agent, partner)
+            elif self.opinion_model == "degroot_bias":
+                self._process_degroot_bias(agent, partner)
+            else:
+                self._process_interaction(agent, partner)
+
+    def _process_hk(self, agent_i, agent_j):
+        """Hegselmann-Krause-style bounded confidence (no SJT/bridge/trust/churn)."""
+        dist = float(np.linalg.norm(agent_i.opinion - agent_j.opinion)) / np.sqrt(
+            len(agent_i.opinion)
+        )
+        if dist < self.hk_epsilon:
+            agent_i.opinion = np.clip(
+                0.5 * (agent_i.opinion + agent_j.opinion), -1.0, 1.0
+            )
+
+    def _process_degroot_bias(self, agent_i, agent_j):
+        """Lightweight biased assimilation without SJT zones, bridge, or trust."""
+        alignment = agent_i.compute_alignment(agent_j)
+        w_ij = agent_i.compute_influence_weight(alignment)
+        if w_ij > 0:
+            mu = w_ij / (1.0 + agent_i.beta)
+            agent_i.opinion = np.clip(
+                agent_i.opinion + mu * (agent_j.opinion - agent_i.opinion),
+                -1.0,
+                1.0,
+            )
+        else:
+            repulsion = abs(w_ij) / (1.0 + agent_i.beta)
+            away = agent_i.opinion - agent_j.opinion
+            agent_i.opinion = np.clip(
+                agent_i.opinion + repulsion * away, -1.0, 1.0
+            )
 
     def _process_interaction(self, agent_i, agent_j):
-        """
-        Full interaction pipeline for agent_i receiving influence
-        from agent_j.
-
-        Step 1  - Alignment (weighted dot-product)
-        Step 2  - Influence weight (Chen et al., 2021)
-        Step 2b - NOVEL: Trust modulation (shifts w_ij upward)
-        Step 3  - Social Judgment zone mapping
-        Step 4  - Update / Backfire (Modified DeGroot)
-        Step 4b - NOVEL: Trust update (co-evolution)
-        Step 5  - Churn check (NOVEL)
-        """
-        # Step 1: Alignment
+        """Full Dynamic-BABE interaction pipeline (with bridge-mode ablations)."""
         alignment = agent_i.compute_alignment(agent_j)
-
-        # Step 2: Influence weight (Chen 2021)
         w_ij = agent_i.compute_influence_weight(alignment)
 
-        # --------------------------------------------------------
-        # Step 2b — NOVEL: Dyadic Trust Modulation
-        # Trust acts as a buffer: high trust shifts w_ij upward,
-        # making it harder to land in the backfire zone.
-        # This is the "friends can disagree" mechanism.
-        # NOTE: Currently symmetric. See config.py for details.
-        # --------------------------------------------------------
         if self.enable_trust:
             trust = agent_i.get_trust(agent_j)
             w_ij = w_ij + cfg.TRUST_INFLUENCE * trust
 
-        # Step 3: Zone classification
         zone = SocialAgent.classify_zone(w_ij)
 
-        # --------------------------------------------------------
-        # NOVEL CONTRIBUTION - Bridge Algorithm Interception
-        # --------------------------------------------------------
         if self.enable_bridge and zone == 3:
-            # Probabilistic dampener - 46 %
-            if self.rng.random() < cfg.BRIDGE_EFFICACY:
-                # SUCCESS: neutralise the backfire -> Zone 2
-                w_ij = 0.0
-                zone = 2  # Non-commitment (frustration NOT incremented)
-                # NOVEL: successful moderation actively restores trust
-                agent_i.frustration = max(
-                    0, agent_i.frustration - cfg.BRIDGE_HEALING_BONUS
-                )
+            if self.rng.random() < self.bridge_efficacy:
+                if self.bridge_mode == "heal_only":
+                    agent_i.frustration = max(
+                        0, agent_i.frustration - self.bridge_healing_bonus
+                    )
+                elif self.bridge_mode == "drop":
+                    agent_i.frustration = max(
+                        0, agent_i.frustration - self.bridge_healing_bonus
+                    )
+                    agent_i.check_churn()
+                    return
+                else:
+                    w_ij = 0.0
+                    zone = 2
+                    agent_i.frustration = max(
+                        0, agent_i.frustration - self.bridge_healing_bonus
+                    )
 
-        # Step 4: Apply update rule
         if zone == 1:
-            # Latitude of Acceptance -> Assimilation (DeGroot)
             agent_i.assimilate(agent_j, w_ij)
         elif zone == 2:
-            # Latitude of Non-Commitment -> Ignore (no opinion change)
             pass
         elif zone == 3:
-            # Latitude of Rejection -> Backfire (repulsion + F_i++)
             agent_i.backfire(agent_j, w_ij)
 
-        # --------------------------------------------------------
-        # Step 4b — NOVEL: Dyadic Trust Update (co-evolution)
-        # Trust builds slowly on agreement, erodes faster on conflict.
-        # Asymmetry grounded in Slovic (1993): trust is fragile.
-        # NOTE: Currently symmetric — both directions updated equally.
-        # --------------------------------------------------------
         if self.enable_trust:
             edge = self.G[agent_i.unique_id][agent_j.unique_id]
-            current_trust = edge.get('trust', cfg.TRUST_INITIAL)
-
+            current_trust = edge.get("trust", cfg.TRUST_INITIAL)
             if zone == 1:
-                # Agreement builds trust (slowly)
                 new_trust = min(1.0, current_trust + cfg.TRUST_GAIN)
             elif zone == 3:
-                # Conflict erodes trust (faster)
                 new_trust = max(0.0, current_trust - cfg.TRUST_LOSS)
             else:
-                # Zone 2 (non-commitment): no trust change
                 new_trust = current_trust
+            edge["trust"] = new_trust
 
-            edge['trust'] = new_trust
-
-        # Step 5: NOVEL - Toxic Churn check
         agent_i.check_churn()
 
     def _decay_trust(self):
-        """
-        Passive trust decay on ALL edges each step.
-
-        Models 'out of sight, out of mind' — relationships that
-        are not actively maintained slowly weaken.
-
-        T_ij ← T_ij * (1 - lambda)
-        """
-        if not self.enable_trust or cfg.TRUST_DECAY <= 0:
+        """Passive trust decay on all edges each step (unless disabled)."""
+        if (
+            not self.enable_trust
+            or self.disable_trust_decay
+            or self.trust_decay <= 0
+        ):
             return
-        decay_factor = 1.0 - cfg.TRUST_DECAY
+        decay_factor = 1.0 - self.trust_decay
         for u, v in self.G.edges():
-            self.G[u][v]['trust'] = self.G[u][v].get(
-                'trust', cfg.TRUST_INITIAL
+            self.G[u][v]["trust"] = self.G[u][v].get(
+                "trust", cfg.TRUST_INITIAL
             ) * decay_factor
 
     # ---------------------------------------------------------------- #
