@@ -163,13 +163,32 @@ def batch_run(
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description="2×2 factorial batch runner")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=None,
+        help="Parallel workers (default: all CPU cores). Use 2 for laptop-safe runs.",
+    )
+    parser.add_argument(
+        "--iters",
+        type=int,
+        default=None,
+        help=f"Replications per condition (default: {cfg.BATCH_ITERATIONS})",
+    )
+    args = parser.parse_args()
+
     out_dir = os.path.join(os.path.dirname(__file__), "output")
     os.makedirs(out_dir, exist_ok=True)
 
-    n_cores = mp.cpu_count()
+    n_cores = args.workers if args.workers is not None else mp.cpu_count()
+    iterations = args.iters if args.iters is not None else cfg.BATCH_ITERATIONS
     wall_start = time.perf_counter()
 
-    print(f"  Detected {n_cores} CPU cores")
+    print(f"  Using {n_cores} workers ({mp.cpu_count()} CPUs available)")
+    print(f"  Iterations per condition: {iterations}")
     print()
 
     conditions = [
@@ -186,7 +205,7 @@ def main():
         print(f"  CONDITION: {name}")
         print("=" * 55)
         model_df, agent_df = batch_run(
-            iterations=cfg.BATCH_ITERATIONS,
+            iterations=iterations,
             enable_bridge=bridge,
             enable_trust=trust,
             n_workers=n_cores,
@@ -200,22 +219,25 @@ def main():
         print()
 
     elapsed = time.perf_counter() - wall_start
-    total_runs = cfg.BATCH_ITERATIONS * len(conditions)
+    total_runs = iterations * len(conditions)
 
     print()
     print("=" * 55)
     print(f"  Batch complete -- {total_runs} total runs in {elapsed:.1f}s")
-    print(f"  ({n_cores} cores, ~{elapsed / total_runs:.2f}s per run)")
+    print(f"  ({n_cores} workers, ~{elapsed / total_runs:.2f}s per run)")
     print(f"  Output ->  {out_dir}")
     print("=" * 55)
 
     # Quick summary statistics
-    for name, _ in conditions:
+    for name, bridge, trust, m_file, a_file in conditions:
         df = results[name]
         final = df.groupby("Run").last()
         print(f"\n  {name} -- Final-step averages across {len(final)} runs:")
         print(f"    Polarization   = {final['Polarization'].mean():.4f}  "
               f"(+/- {final['Polarization'].std():.4f})")
+        if "Polarization_All" in final.columns:
+            print(f"    Polarization_All= {final['Polarization_All'].mean():.4f}  "
+                  f"(+/- {final['Polarization_All'].std():.4f})")
         print(f"    Revenue        = {final['Revenue'].mean():.2f}  "
               f"(+/- {final['Revenue'].std():.2f})")
         print(f"    Churn Rate     = {final['Churn_Rate'].mean():.4f}  "

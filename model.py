@@ -35,23 +35,36 @@ def _active_agents(model):
     return [a for a in model.schedule.agents if a.active]
 
 
+def _polarization_from_agents(agents):
+    """RMS of per-dimension stds over a list of agents' opinion vectors."""
+    if len(agents) < 2:
+        return 0.0
+    opinions = np.array([a.opinion for a in agents])
+    per_dim_std = np.std(opinions, axis=0)
+    return float(np.sqrt(np.mean(per_dim_std ** 2)))
+
+
 def compute_polarization(model):
     """
-    Global polarization sigma - root-mean-square of per-dimension
-    standard deviations across all active opinion vectors.
+    Primary polarization KPI (sigma): RMS of per-dimension stds across
+    *active* agents only. Matches the exit/retention story — churned
+    agents leave the communication graph and are excluded.
 
     This avoids the "Data Flattening" trap: np.mean(opinion)
     would cancel out multidimensional extremism (e.g. [+1,-1]
     looks like 0).  Instead we measure spread in EACH dimension
     and combine via RMS (Root Mean Square).
     """
-    active = _active_agents(model)
-    if len(active) < 2:
-        return 0.0
-    # Stack into (n_agents, n_issues) matrix
-    opinions = np.array([a.opinion for a in active])
-    per_dim_std = np.std(opinions, axis=0)          # std per issue dimension
-    return float(np.sqrt(np.mean(per_dim_std ** 2))) # RMS of per-dim stds
+    return _polarization_from_agents(_active_agents(model))
+
+
+def compute_polarization_all(model):
+    """
+    Robustness polarization (sigma_all): same RMS construction over the
+    *full* cohort. Churned agents retain their last opinion vector, so
+    this metric is not confounded by survivorship bias in the active set.
+    """
+    return _polarization_from_agents(list(model.schedule.agents))
 
 
 def compute_revenue(model):
@@ -194,9 +207,8 @@ def compute_opinion_clustering(model):
                 na, nb = neighbours[idx_a], neighbours[idx_b]
                 if not G.has_edge(na, nb):
                     continue
-                # Triangle found: (nid, na, nb)
-                total_triangles += 1
 
+                # Count only active–active–active triples (agent is active)
                 a_na = G.nodes[na].get("agent")
                 a_nb = G.nodes[nb].get("agent")
                 if a_na is None or a_nb is None:
@@ -204,9 +216,9 @@ def compute_opinion_clustering(model):
                 if not a_na.active or not a_nb.active:
                     continue
 
+                total_triangles += 1
                 pole_a = np.sign(a_na.opinion.mean())
                 pole_b = np.sign(a_nb.opinion.mean())
-
                 if pole_i == pole_a == pole_b:
                     same_pole_triangles += 1
 
@@ -274,12 +286,12 @@ class SocialNetworkModel(Model):
 
         # Reproducibility
         # Partner choice / bridge draws use numpy Generator(seed).
-        # Mesa RandomActivation shuffle uses model.random, which in Mesa 2.x
-        # is keyed off self._seed — set _seed BEFORE creating the scheduler
-        # so activation order is deterministic for this seed. Do not reorder
-        # these assignments without re-validating batch reproducibility.
+        # Mesa RandomActivation shuffle uses model.random (Python random.Random).
+        # Mesa 2.x Model.__init__ seeds model.random from uncontrolled entropy;
+        # setting self._seed alone does NOT re-seed model.random. Always call
+        # reset_randomizer(seed) so activation order is deterministic.
+        self.reset_randomizer(seed)
         self.rng = np.random.default_rng(seed)
-        self._seed = seed
 
         # Parameters (instance overrides keep multiprocessing workers isolated)
         self.num_agents = num_agents
@@ -342,7 +354,7 @@ class SocialNetworkModel(Model):
             for u, v in self.G.edges():
                 self.G[u][v]['trust'] = cfg.TRUST_INITIAL
 
-        # Scheduler (after _seed so shuffle stream matches seed)
+        # Scheduler (after reset_randomizer so shuffle uses seeded model.random)
         self.schedule = RandomActivation(self)
 
         # Populate
@@ -354,6 +366,7 @@ class SocialNetworkModel(Model):
         # Data collection — build reporters dict dynamically
         model_reporters = {
             "Polarization": compute_polarization,
+            "Polarization_All": compute_polarization_all,
             "Revenue": compute_revenue,
             "Churn_Rate": compute_churn_rate,
             "Avg_Frustration": compute_avg_frustration,
@@ -461,10 +474,8 @@ class SocialNetworkModel(Model):
                         0, agent_i.frustration - self.bridge_healing_bonus
                     )
                 elif self.bridge_mode == "drop":
-                    agent_i.frustration = max(
-                        0, agent_i.frustration - self.bridge_healing_bonus
-                    )
-                    agent_i.check_churn()
+                    # Skip the interaction entirely: no opinion/trust update
+                    # and no healing bonus (distinct from intercept).
                     return
                 else:
                     w_ij = 0.0

@@ -12,11 +12,11 @@
 
 ## Research Overview
 
-This repository implements **Dynamic-BABE (Biased Assimilation & Behavioral Entrenchment)**, an agent-based model of how bridging-style feed interventions interact with co-evolving dyadic trust.
+This repository implements **Dynamic-BABE (Biased Assimilation & Behavioral Entrenchment)**, an agent-based model of how a suppression-oriented feed filter interacts with co-evolving dyadic trust.
 
-**Polarization Paradox:** bridging sharply reduces churn and protects step-wise revenue, yet final polarization can rise because extreme agents who would otherwise exit remain active.
+**Polarization Paradox:** the filter sharply reduces churn and protects step-wise revenue, yet final polarization can rise because extreme agents who would otherwise exit remain active.
 
-**Trust segregation:** enabling trust co-evolution (Trust Only vs Baseline) concentrates trust inside ideological silos while outgroup trust collapses. That contrast is distinct from the bridging paradox.
+**Trust segregation:** enabling trust co-evolution (Trust Only vs Baseline) concentrates trust inside ideological silos while outgroup trust collapses. That contrast is distinct from the filter paradox.
 
 ---
 
@@ -25,7 +25,10 @@ This repository implements **Dynamic-BABE (Biased Assimilation & Behavioral Entr
 - Base seed: `RANDOM_SEED = 42` in `config.py`
 - Batch run \(i\) uses seed `42 + i` (paired across the four factorial conditions)
 - Partner choice / bridge draws: `numpy.random.Generator(seed)`
-- Mesa `RandomActivation` shuffle: Mesa 2.x `model.random` via `self._seed` set before the scheduler is created
+- Mesa `RandomActivation` shuffle: `model.reset_randomizer(seed)` so `model.random` matches the seed (setting `_seed` alone is not enough in Mesa 2.x)
+- Self-check: `python scripts/check_reproducibility.py` (two runs, same seed → identical key KPI columns)
+
+**Terminology note:** In the manuscript the intervention is a *suppression-oriented feed filter* (short: suppression filter). The code flag `enable_bridge` is unchanged for API continuity; it is **not** “bridging-based ranking” (constructive cross-camp promotion).
 
 ---
 
@@ -37,7 +40,8 @@ python -m venv .venv
 .\.venv\Scripts\activate          # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
 
-python batch_run.py               # 4 conditions × 30 runs (long)
+python scripts/check_reproducibility.py
+python batch_run.py --workers=2   # 4 conditions × 30 runs (long); omit --workers for all cores
 python stats_analysis.py          # Mann–Whitney pairwise + Wilcoxon interactions
 python visualize.py               # figures/ PNGs (~800 px wide for JASSS)
 python sensitivity.py             # OFAT robustness (long); --quick for smoke test

@@ -15,6 +15,7 @@ from model import SocialNetworkModel
 
 KPIS = [
     "Polarization",
+    "Polarization_All",
     "Churn_Rate",
     "Revenue",
     "Avg_Frustration",

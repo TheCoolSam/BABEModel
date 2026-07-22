@@ -6,7 +6,7 @@ We describe Dynamic-BABE with the ODD+D protocol~\citep{Grimm2010, Muller2013} s
 \subsection{Overview}
 
 \subsubsection{Purpose}
-Dynamic-BABE is a theoretical laboratory for feedback among interpersonal trust, biased assimilation / backfire, and stylized feed bridging. We use it to study the Polarization Paradox: bridging can cut exit and protect revenue while leaving (or raising) systemic polarization.
+Dynamic-BABE is a theoretical laboratory for feedback among interpersonal trust, biased assimilation / backfire, and a stylized suppression-oriented feed filter. We use it to study the Polarization Paradox: the filter can cut exit and protect revenue while leaving (or raising) systemic polarization.
 
 \subsubsection{Entities, State Variables, and Scales}
 Two entities drive the simulation: \textbf{agents} (users navigating their feeds) and the \textbf{network environment} (the network's structural pathways and the platform's moderation layer).
@@ -42,7 +42,7 @@ Each step $t$ triggers a sequence of operations that update opinions, frustratio
     \begin{equation}
         T_{uv}(t+1) = T_{uv}(t) \cdot (1 - \lambda)
     \end{equation}
-    \item \textbf{Platform Diagnostics:} The model computes and logs global metrics: opinion polarization $\sigma(t)$, cumulative churn, user frustration, active user count, ingroup/outgroup trust divergence, and opinion-weighted clustering.
+    \item \textbf{Platform Diagnostics:} The model computes and logs global metrics: opinion polarization $\sigma(t)$ over active agents, full-cohort polarization $\sigma_{\mathrm{all}}(t)$ (churned agents retain last opinions), cumulative churn, user frustration, active user count, ingroup/outgroup trust divergence, and opinion-weighted clustering.
     \item \textbf{Termination Check:} The simulation halts when the step count reaches $t_{\max} = 200$, or if all users exit ($N_{\text{active}} = 0$).
 \end{enumerate*}
 
@@ -73,7 +73,7 @@ Each agent $i$ tracks its direct topological neighbors with perfect accuracy. Du
 Agents react purely to immediate events, operating without forward-looking predictions. They neither anticipate neighbor opinion shifts nor forecast their own impending exit as frustration mounts toward the churn threshold.
 
 \subsubsection{Interaction}
-Interactions unfold locally, dyadically, and directionally. While trust updates symmetrically across the edge $(i, j)$, opinion and frustration updates execute from the perspective of the active agent receiving the communication. The platform's bridging algorithm acts as an external filter, intercepting high-friction exchanges to suppress the behavioral symptoms of disagreement.
+Interactions unfold locally, dyadically, and directionally. While trust updates symmetrically across the edge $(i, j)$, opinion and frustration updates execute from the perspective of the active agent receiving the communication. The platform's suppression filter acts as an external gatekeeper, intercepting high-friction exchanges to suppress the behavioral symptoms of disagreement.
 
 \subsubsection{Collectives}
 No formal collectives (such as political parties or coalitions) exist in our model. However, functional collectives emerge endogenously through conversational dynamics. Agents coalesce into two opposing ideological factions based on their opinion signs. These emergent camps govern the flow of trust and drive the self-organization of network clusters.
@@ -93,20 +93,21 @@ We integrate stochasticity to capture social noise and scheduling dynamics:
     \item The preferential attachment model generates network topologies stochastically.
     \item Shuffling shatters sequential order by randomizing agent activation at each step.
     \item Dialogue partner selection is stochastic, choosing randomly from active neighbors.
-    \item The bridging algorithm operates probabilistically, intercepting rejection events with an efficacy rate of $E = 46\%$.
+    \item The suppression filter operates probabilistically, intercepting rejection events with an efficacy rate of $E = 46\%$.
     \item Initial values for opinion, salience, and entrenchment are drawn randomly from their respective probability distributions.
 \end{itemize*}
 
 \subsubsection{Observation}
 We record the system's trajectory at the end of each step by collecting system-level and agent-level diagnostics:
 \begin{itemize*}
-    \item \textbf{Global Polarization ($\sigma(t)$):} The root-mean-square (RMS) of per-dimension opinion standard deviations across active agents.
+    \item \textbf{Global Polarization ($\sigma(t)$):} The root-mean-square (RMS) of per-dimension opinion standard deviations across \emph{active} agents (primary KPI; matches the exit story).
+    \item \textbf{Full-cohort Polarization ($\sigma_{\mathrm{all}}(t)$):} The same RMS construction over all agents; churned agents retain their last opinion vector (robustness check against survivorship).
     \item \textbf{Active User Count ($N_{\text{active}}$):} The sum of active nodes.
     \item \textbf{Churn Rate:} The cumulative fraction of the population that has permanently exited.
     \item \textbf{Average Frustration:} The mean frustration across active users.
-    \item \textbf{Platform Revenue ($R(t)$):} Total advertising earnings, which drop when polarization triggers advertiser flight.
+    \item \textbf{Platform Revenue ($R(t)$):} Total advertising earnings under a stylized brand-safety step function of $\sigma(t)$.
     \item \textbf{Trust Segregation Ratio:} The ratio of mean ingroup trust to mean outgroup trust.
-    \item \textbf{Opinion-Weighted Clustering:} The density of triadic relationships where all three connected nodes share the same opinion pole.
+    \item \textbf{Opinion-Weighted Clustering:} Among active--active--active triangles, the fraction that are same-pole.
 \end{itemize*}
 
 \subsection{Details}
@@ -163,7 +164,7 @@ Under the \textbf{Dyadic Trust} system, relational trust modulates this weight, 
 \begin{equation}
     w_{ij} = 1.0 + \beta_i A_{ij} + \gamma_T T_{ij}
 \end{equation}
-where $\gamma_T \geq 0$ represents the trust influence coefficient (\texttt{TRUST\_INFLUENCE} = 0.3) and $T_{ij} \in [0, 1]$ represents the dyadic trust. This trust buffer mathematically models the relational buffer that keeps relationships intact during disagreement: high trust elevates the influence weight, preventing debate from deteriorating into hostile backfires. When trust co-evolution is disabled, the model sets $T_{ij} = 0$ dynamically in the weight equation, yielding the baseline form $w_{ij} = 1.0 + \beta_i A_{ij}$. This represents the unmodulated, baseline cognitive state and aligns the theoretical specification with our simulation codebase.
+where $\gamma_T \geq 0$ represents the trust influence coefficient (\texttt{TRUST\_INFLUENCE} = 0.3) and $T_{ij} \in [0, 1]$ represents the dyadic trust. This trust buffer mathematically models the relational buffer that keeps relationships intact during disagreement: high trust elevates the influence weight, preventing debate from deteriorating into hostile backfires. When trust co-evolution is disabled, the model sets $T_{ij} = 0$ dynamically in the weight equation, yielding the baseline form $w_{ij} = 1.0 + \beta_i A_{ij}$. This represents the unmodulated, baseline cognitive state and aligns the theoretical specification with our simulation codebase. Conceptually, shifting $w_{ij}$ via $T_{ij}$ is a source-credibility / relational-weighting mechanism layered on SJT zone classification, not a claim that trust itself is an SJT latitude.
 
 \subsubsection{Step 3: Social Judgment Zone Classification}
 Unlike the collective, synchronous averaging of Chen et al. \citep{Chen2021}, we translate this cognitive logic into a local, pairwise interaction paradigm. To track individual metrics like frustration, churn, and algorithmic interventions, we classify interactions using Social Judgment Theory \citep{Sherif1961, Jager2005}. The perceived influence weight $w_{ij}$ dictates the interaction zone:
@@ -176,12 +177,12 @@ Unlike the collective, synchronous averaging of Chen et al. \citep{Chen2021}, we
 \end{equation}
 where $\tau_{\text{assim}} = 0.3$ represents the assimilation threshold. We model these latitude boundaries as stylized, uniform thresholds across the population for mathematical tractability and to isolate the systemic co-evolutionary feedback loops. In empirical social systems, these latitudes are highly subjective and dynamic, varying widely across individuals based on issue-specific emotional involvement and prior ideological extremity. We discuss the implications of this stylized assumption in Section~\ref{sec:discussion}.
 
-\subsubsection{Step 4: Algorithmic Moderation (The Bridge Algorithm)}
-When active, the platform's bridging algorithm intercepts backfire (Zone 3) events with an efficacy rate of $E = 0.46$:
+\subsubsection{Step 4: Algorithmic Moderation (Suppression Filter)}
+When active, the platform's suppression-oriented feed filter (code flag \texttt{enable\_bridge}; factorial label Bridge ON) intercepts backfire (Zone 3) events with an efficacy rate of $E = 0.46$:
 \begin{equation}
     w_{ij} \leftarrow 0.0, \quad \text{Zone}(w_{ij}) \leftarrow 2 \quad \text{with probability } E
 \end{equation}
-Interception neutralizes the opinion repulsion, downgrading the conflict to Zone 2 (Ignore). In addition, successful moderation grants a frustration relief bonus to preserve the agent's psychological state. We model this frustration relief bonus ($B_{hb} = 2$) as the platform's active delivery of "dopaminergic comfort" or "algorithmic reinforcement" (e.g., stochastically substituting a hostile outgroup post with a soothing, highly engaging ingroup post or distracting entertainment). This intervention actively diverts attention, helping to soothe and heal preexisting cognitive friction.
+Interception neutralizes the opinion repulsion, downgrading the conflict to Zone 2 (Ignore). In addition, successful moderation grants a frustration relief bonus to preserve the agent's psychological state. We model this frustration relief bonus ($B_{hb} = 2$) as the platform's active delivery of ``dopaminergic comfort'' or ``algorithmic reinforcement'' (e.g., stochastically substituting a hostile outgroup post with a soothing, highly engaging ingroup post or distracting entertainment). This intervention actively diverts attention, helping to soothe and heal preexisting cognitive friction. This is \emph{not} bridging-based ranking that promotes constructive cross-camp content.
 
 \subsubsection{Step 5: Opinion Update Rules}
 We update the opinion vector $\vec{O}_i$ depending on the final interaction zone:
@@ -194,7 +195,7 @@ We update the opinion vector $\vec{O}_i$ depending on the final interaction zone
     \begin{equation}
         \mu_{ij} = \frac{w_{ij}}{1.0 + \beta_i}
     \end{equation}
-    This ensures that highly entrenched agents (high $\beta_i$) make smaller opinion adjustments, reflecting cognitive resistance. The vector-wise operator $\Pi_{[-1, 1]}$ acts element-wise to clip (clamp) updated opinions to the valid range $[-1.0, 1.0]$. We note that under conditions of absolute alignment ($A_{ij} = 1.0$) and high dyadic trust ($T_{ij} = 1.0$), the influence step size can stochastically exceed unity ($\mu_{ij} > 1.0$). While classical DeGroot consensus models enforce a strict convex combination ($\mu_{ij} \in [0, 1]$) to maintain the convex hull of opinions, our formulation permits this mathematical "overshoot." In the context of relational network dynamics, this represents a "passionate consensus" or "social reinforcement effect"---a psychological phenomenon where deep interpersonal trust and absolute agreement trigger cognitive enthusiasm, prompting the receiver to adopt a stance even more extreme than their trusted peer.
+    This ensures that highly entrenched agents (high $\beta_i$) make smaller opinion adjustments, reflecting cognitive resistance. The vector-wise operator $\Pi_{[-1, 1]}$ acts element-wise to clip (clamp) updated opinions to the valid range $[-1.0, 1.0]$. We note that under conditions of absolute alignment ($A_{ij} = 1.0$) and high dyadic trust ($T_{ij} = 1.0$), the influence step size can exceed unity ($\mu_{ij} > 1.0$). Under default trust-off Baseline runs, $\mu_{ij}>1$ is rare ($\approx 0.9\%$ of assimilation updates in a short diagnostic); with trust on it becomes more available. While classical DeGroot consensus models enforce a strict convex combination ($\mu_{ij} \in [0, 1]$) to maintain the convex hull of opinions, our formulation permits this mathematical ``overshoot.'' In the context of relational network dynamics, this represents a ``passionate consensus'' or ``social reinforcement effect''---a psychological phenomenon where deep interpersonal trust and absolute agreement trigger cognitive enthusiasm, prompting the receiver to adopt a stance even more extreme than their trusted peer.
     
     \item \textbf{Zone 2 (Non-Commitment):} The interaction is ignored, leaving the opinion vector unchanged:
     \begin{equation}
@@ -293,7 +294,7 @@ $k_{\text{step}}$ & Dialogue partners selected per step & $1$ & Micro-interactio
 $\tau_{\text{assim}}$ & Assimilation threshold & $0.3$ & Social Judgment Theory threshold \\
 $T_c$ & Churn frustration threshold & $15$ & Toxic churn tolerance capacity \\
 $H$ & Natural frustration healing rate & $1$ & Cognitive cooling per positive contact \\
-$B_{hb}$ & Bridge moderation healing bonus & $2$ & Active relief under algorithmic safety \\
+$B_{hb}$ & Suppression-filter healing bonus & $2$ & Active relief under algorithmic safety \\
 $r_{\text{ad}}$ & Base advertising rate per step & \$1.00 & Baseline monetization rate \\
 $\tau_{\text{cliff}}$ & Brand safety polarization cliff & $0.6$ & Advertiser flight tipping point \\
 $M_{\text{safe}}$ & Brand safe revenue multiplier & $1.0$ & Normal ad monetization \\

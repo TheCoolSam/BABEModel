@@ -109,6 +109,22 @@ def bonferroni_correct(p_values):
 # Main analysis pipeline
 # ====================================================================
 
+# Cap for Trust Segregation when outgroup trust ≈ 0 (mirrors experiments/_common.py)
+TRUST_SEGREGATION_CAP = 1e6
+
+
+def _cap_trust_segregation(df: pd.DataFrame) -> pd.DataFrame:
+    """Replace inf / extreme Trust_Segregation with a finite analysis cap."""
+    if "Trust_Segregation" not in df.columns:
+        return df
+    out = df.copy()
+    col = out["Trust_Segregation"].astype(float)
+    col = col.replace([np.inf, -np.inf], TRUST_SEGREGATION_CAP)
+    col = col.clip(upper=TRUST_SEGREGATION_CAP)
+    out["Trust_Segregation"] = col
+    return out
+
+
 def load_final_step_data():
     """
     Load all 4 model-level CSVs and extract the FINAL step of each run.
@@ -120,7 +136,7 @@ def load_final_step_data():
         "Trust Only": "model_data_trust_only.csv",
         "Full Model": "model_data_full_model.csv",
     }
-    
+
     data_dict = {}
     for name, filename in csv_map.items():
         path = os.path.join(DATA_DIR, filename)
@@ -129,8 +145,8 @@ def load_final_step_data():
             continue
         df = pd.read_csv(path)
         final_df = df.groupby("Run").last().reset_index()
-        data_dict[name] = final_df
-        
+        data_dict[name] = _cap_trust_segregation(final_df)
+
     return data_dict
 
 
@@ -354,8 +370,10 @@ def format_table(pairwise_df, interaction_df):
               f"{row['p_value_adjusted']:.6f} | "
               f"{sig_mark:<11}")
     print("=" * 120)
-    print("  * Pairwise: Mann-Whitney U. Interaction: Wilcoxon signed-rank on paired contrasts.")
+    print("  * Pairwise: Mann-Whitney U (skewed/bounded metrics). Interaction: Wilcoxon on paired contrasts.")
+    print("  * Cohen's d reported as a parametric complement to the rank tests.")
     print("  * Bonferroni correction applied independently to pairwise tests and interaction tests.")
+    print("  * Trust_Segregation capped at 1e6 for analysis (inf -> cap).")
     print("=" * 120)
 
 

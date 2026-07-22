@@ -143,13 +143,19 @@ def plot_summary_bars(df):
     # Get last step for each run
     final = df.groupby(["Run", "Condition"]).last().reset_index()
 
-    metrics = ["Polarization", "Revenue", "Churn_Rate",
+    metrics = ["Polarization", "Polarization_All", "Revenue", "Churn_Rate",
                "Avg_Frustration", "Active_Users"]
-    labels = ["Polarization\n(sigma)", "Revenue\n($)",
-              "Churn Rate\n(%)", "Avg Frustration\n(F_i)",
+    labels = ["Polarization\n(sigma)", "Polarization_All\n(sigma_all)",
+              "Revenue\n($)", "Churn Rate\n(%)", "Avg Frustration\n(F_i)",
               "Active Users\n(count)"]
+    # Drop Polarization_All if absent from older CSVs
+    keep = [(m, lab) for m, lab in zip(metrics, labels)
+            if m in final.columns]
+    metrics, labels = zip(*keep) if keep else (metrics[:1], labels[:1])
 
-    fig, axes = plt.subplots(1, 5, figsize=(FIG_W, 3.2))
+    fig, axes = plt.subplots(1, len(metrics), figsize=(FIG_W, 3.2))
+    if len(metrics) == 1:
+        axes = [axes]
 
     cond_names = list(CONDITIONS.keys())
     n_conds = len(cond_names)
@@ -363,6 +369,12 @@ def main():
     plot_metric(df, "Polarization", "Global Polarization (sigma)",
                 "Polarization Over Time — 2×2 Factorial",
                 "fig2_polarization_factorial.png")
+
+    if "Polarization_All" in df.columns:
+        plot_metric(df, "Polarization_All",
+                    r"Full-cohort Polarization ($\sigma_{all}$)",
+                    "Polarization_All Over Time — 2×2 Factorial",
+                    "fig2b_polarization_all_factorial.png")
 
     plot_metric(df, "Churn_Rate", "Churn Rate (fraction)",
                 "Cumulative Churn Rate — 2×2 Factorial",
