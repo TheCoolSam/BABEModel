@@ -41,7 +41,7 @@ BRIDGE_EFFICACY = 0.46
 # "friends can argue without unfriending each other."
 # NOTE: Currently symmetric (T_ij = T_ji). Future work should explore
 #       asymmetric trust where T_ij ≠ T_ji (I may trust you more than
-#       you trust me). See implementation_plan.md for rationale.
+#       you trust me).
 ENABLE_TRUST = False
 TRUST_INITIAL = 0.5           # T_0: starting trust for all edges
 TRUST_INFLUENCE = 0.3         # alpha: how much trust shifts w_ij upward

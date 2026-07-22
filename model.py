@@ -121,7 +121,8 @@ def compute_ingroup_trust(model):
             continue
         if not a_u.active or not a_v.active:
             continue
-        # Same pole = same sign of mean opinion
+        # Same pole = same sign of mean opinion.
+        # Note: sign(0)=0 is a distinct zero pole (rare under bipolar init).
         if np.sign(a_u.opinion.mean()) == np.sign(a_v.opinion.mean()):
             trusts.append(d.get('trust', cfg.TRUST_INITIAL))
     return float(np.mean(trusts)) if trusts else 0.0
@@ -260,6 +261,11 @@ class SocialNetworkModel(Model):
         super().__init__()
 
         # Reproducibility
+        # Partner choice / bridge draws use numpy Generator(seed).
+        # Mesa RandomActivation shuffle uses model.random, which in Mesa 2.x
+        # is keyed off self._seed — set _seed BEFORE creating the scheduler
+        # so activation order is deterministic for this seed. Do not reorder
+        # these assignments without re-validating batch reproducibility.
         self.rng = np.random.default_rng(seed)
         self._seed = seed
 
@@ -283,7 +289,7 @@ class SocialNetworkModel(Model):
             for u, v in self.G.edges():
                 self.G[u][v]['trust'] = cfg.TRUST_INITIAL
 
-        # Scheduler
+        # Scheduler (after _seed so shuffle stream matches seed)
         self.schedule = RandomActivation(self)
 
         # Populate

@@ -6,7 +6,7 @@ Reads batch_run.py 2×2 factorial CSV outputs and produces:
   1. Pairwise Mann-Whitney U tests (non-parametric, no normality assumption)
   2. Cohen's d effect sizes (standardised magnitude of difference)
   3. Bootstrap 95% Confidence Intervals for each condition
-  4. Bridge × Trust Interaction Analysis (Mann-Whitney U on seed-paired differences)
+  4. Bridge × Trust Interaction Analysis (Wilcoxon signed-rank on seed-paired contrasts)
   5. Formatted output suitable for publication tables and supplementary material
 
 Pairwise Comparisons (6 pairs):
@@ -234,9 +234,9 @@ def run_interaction_analysis(data_dict, metrics=None):
       effect_bridge_alone = (Bridge Only) - (Baseline)
       effect_bridge_with_trust = (Full Model) - (Trust Only)
 
-    We compare these two distributions with Mann-Whitney U. If they are
-    significantly different, it means the Bridge Algorithm's effect changes
-    significantly in the presence of Trust (moderation / interaction).
+    We test the paired contrast (effect_with_trust - effect_alone) with a
+    Wilcoxon signed-rank test. If significant, the Bridge effect changes
+    in the presence of Trust (moderation / interaction).
     """
     required = {"Baseline", "Bridge Only", "Trust Only", "Full Model"}
     if not required.issubset(data_dict.keys()):
@@ -266,21 +266,32 @@ def run_interaction_analysis(data_dict, metrics=None):
     interaction_rows = []
     
     for metric in metrics:
-        # Paired differences
+        # Paired differences aligned by Run
         diff_alone = df_bridge[metric] - df_baseline[metric]
         diff_with_trust = df_full[metric] - df_trust[metric]
+        paired_contrast = (diff_with_trust - diff_alone).astype(float).values
 
-        # Check if they are identical (no variation in both differences)
-        if np.all(diff_alone == diff_alone.iloc[0]) and np.all(diff_with_trust == diff_with_trust.iloc[0]) and diff_alone.iloc[0] == diff_with_trust.iloc[0]:
+        # Skip if contrast is identically zero
+        if np.allclose(paired_contrast, 0.0):
             continue
 
-        mean_alone = np.mean(diff_alone)
-        mean_with_trust = np.mean(diff_with_trust)
+        mean_alone = float(np.mean(diff_alone))
+        mean_with_trust = float(np.mean(diff_with_trust))
 
-        # Non-parametric Mann-Whitney U on the paired differences
-        u_stat, p_val = mann_whitney_u(diff_alone.values, diff_with_trust.values)
+        # Wilcoxon signed-rank on paired contrasts (omit zero differences)
+        nonzero = paired_contrast[np.abs(paired_contrast) > 1e-15]
+        if len(nonzero) < 2:
+            w_stat, p_val = 0.0, 1.0
+        else:
+            try:
+                w_stat, p_val = stats.wilcoxon(
+                    nonzero, alternative="two-sided", zero_method="wilcox"
+                )
+                w_stat, p_val = float(w_stat), float(p_val)
+            except ValueError:
+                w_stat, p_val = 0.0, 1.0
 
-        # Cohen's d of the bridge effects
+        # Cohen's d of the bridge effects (same definition as before)
         pooled_std = np.sqrt((np.var(diff_alone, ddof=1) + np.var(diff_with_trust, ddof=1)) / 2.0)
         d = (mean_with_trust - mean_alone) / pooled_std if pooled_std > 1e-12 else 0.0
 
@@ -290,7 +301,7 @@ def run_interaction_analysis(data_dict, metrics=None):
             "Mean_Bridge_Effect_With_Trust": mean_with_trust,
             "Cohen_d_Interaction": d,
             "Effect_Magnitude": d_magnitude(d),
-            "U_statistic": u_stat,
+            "W_statistic": w_stat,
             "p_value_raw": p_val,
         })
 
@@ -330,8 +341,8 @@ def format_table(pairwise_df, interaction_df):
     print("  DYNAMIC-BABE MODEL — BRIDGE × TRUST INTERACTION / MODERATION ANALYSIS")
     print("  (Compares the Bridge Effect without Trust vs the Bridge Effect with Trust)")
     print("=" * 110)
-    print(f"  {'Metric':<22} | {'Bridge Effect Alone':<22} | {'Bridge Effect w/Trust':<22} | {'Interaction d':<14} | {'adj_p':<8} | {'Significant':<11}")
-    print("-" * 110)
+    print(f"  {'Metric':<22} | {'Bridge Effect Alone':<22} | {'Bridge Effect w/Trust':<22} | {'Interaction d':<14} | {'W':<10} | {'adj_p':<8} | {'Significant':<11}")
+    print("-" * 120)
     
     for _, row in interaction_df.iterrows():
         sig_mark = "Yes [**]" if row["Significant_0.05"] == "Yes" else "No"
@@ -339,12 +350,13 @@ def format_table(pairwise_df, interaction_df):
               f"{row['Mean_Bridge_Effect_Alone']:+21.4f} | "
               f"{row['Mean_Bridge_Effect_With_Trust']:+21.4f} | "
               f"{row['Cohen_d_Interaction']:+13.4f} | "
+              f"{row['W_statistic']:<10.1f} | "
               f"{row['p_value_adjusted']:.6f} | "
               f"{sig_mark:<11}")
-    print("=" * 110)
-    print("  * Non-parametric Mann-Whitney U test used for both pairwise and interaction tests.")
+    print("=" * 120)
+    print("  * Pairwise: Mann-Whitney U. Interaction: Wilcoxon signed-rank on paired contrasts.")
     print("  * Bonferroni correction applied independently to pairwise tests and interaction tests.")
-    print("=" * 110)
+    print("=" * 120)
 
 
 def main():

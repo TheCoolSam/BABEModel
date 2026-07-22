@@ -75,7 +75,7 @@ class SocialAgent(Agent):
         """
         if not self.model.enable_trust:
             return cfg.TRUST_INITIAL
-        """symmetric (T_ij = T_ji)"""
+        # Symmetric by design: T_ij = T_ji (stored once per undirected edge).
         G = self.model.G
         if G.has_edge(self.unique_id, other.unique_id):
             return G[self.unique_id][other.unique_id].get(

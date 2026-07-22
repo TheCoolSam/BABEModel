@@ -85,10 +85,19 @@ def _sweep_worker(args):
     """
     param_name, param_value, enable_bridge, seed, run_id, label, max_steps = args
 
-    # Override the parameter in THIS process's cfg
-    setattr(cfg, param_name, param_value)
+    # Restore defaults, then override the single OFAT parameter.
+    # Pool workers are reused, so leftover setattr from prior jobs must be cleared.
+    cfg.BETA_MEAN = 4.0
+    cfg.ASSIMILATION_THRESHOLD = 0.3
+    cfg.CHURN_THRESHOLD = 15
+    cfg.NUM_ISSUES = 2
+    cfg.TRUST_INFLUENCE = 0.3
+    cfg.BRIDGE_EFFICACY = 0.46
+    cfg.BA_EDGE_PARAM = 3
+    cfg.ENABLE_TRUST = False
+    cfg.ENABLE_BRIDGE = False
 
-    # For TRUST_INFLUENCE sweep, ensure trust is enabled
+    setattr(cfg, param_name, param_value)
     if param_name == "TRUST_INFLUENCE":
         cfg.ENABLE_TRUST = True
 
@@ -97,6 +106,7 @@ def _sweep_worker(args):
             num_agents=cfg.NUM_AGENTS,
             ba_m=cfg.BA_EDGE_PARAM,
             enable_bridge=enable_bridge,
+            enable_trust=cfg.ENABLE_TRUST,
             seed=seed,
         )
         for _ in range(max_steps):
@@ -152,7 +162,8 @@ def ofat_sweep(iterations=None, quick=False, n_workers=None):
     if iterations is None:
         iterations = 3 if quick else cfg.BATCH_ITERATIONS
     if n_workers is None:
-        n_workers = mp.cpu_count()
+        # Cap default workers so the host UI stays usable (override with --workers=N).
+        n_workers = max(1, min(2, mp.cpu_count()))
 
     base_seed = cfg.RANDOM_SEED
     max_steps = cfg.MAX_STEPS
@@ -168,7 +179,7 @@ def ofat_sweep(iterations=None, quick=False, n_workers=None):
                                  run_id, label, max_steps))
 
     total_jobs = len(jobs)
-    print(f"  Total jobs: {total_jobs}  ({n_workers} workers)")
+    print(f"  Total jobs: {total_jobs}  ({n_workers} workers)", flush=True)
 
     # Execute in parallel
     all_rows = []
@@ -181,7 +192,7 @@ def ofat_sweep(iterations=None, quick=False, n_workers=None):
             completed += 1
             if completed % 50 == 0 or completed == total_jobs:
                 pct = 100 * completed / total_jobs
-                print(f"  Progress: {completed:>5}/{total_jobs} ({pct:.0f}%)")
+                print(f"  Progress: {completed:>5}/{total_jobs} ({pct:.0f}%)", flush=True)
 
     return pd.DataFrame(all_rows)
 
@@ -231,7 +242,7 @@ def plot_sensitivity(results_df):
         fig.suptitle(f"Sensitivity: {label}", fontweight="bold", fontsize=12)
         plt.tight_layout()
         fname = f"sensitivity_{param_name.lower()}.png"
-        fig.savefig(os.path.join(FIG_DIR, fname), dpi=200, bbox_inches="tight")
+        fig.savefig(os.path.join(FIG_DIR, fname), dpi=100, bbox_inches="tight")
         plt.close(fig)
         print(f"  Saved: {fname}")
 
@@ -280,7 +291,7 @@ def plot_sensitivity_heatmap(results_df):
                  fontweight="bold")
     plt.tight_layout()
     fig.savefig(os.path.join(FIG_DIR, "sensitivity_heatmap.png"),
-                dpi=200, bbox_inches="tight")
+                dpi=100, bbox_inches="tight")
     plt.close(fig)
     print("  Saved: sensitivity_heatmap.png")
 
@@ -295,28 +306,45 @@ def main():
 
     quick = "--quick" in sys.argv
     if quick:
-        print("  ⚡ Quick mode: 3 iterations per sweep point")
+        print("  Quick mode: 3 iterations per sweep point", flush=True)
+    if "--laptop" in sys.argv:
+        print("  Laptop mode: 2 workers, 5 iters (UI stays usable)", flush=True)
 
     wall_start = time.perf_counter()
 
-    print("╔══════════════════════════════════════════════════╗")
-    print("║  OFAT Sensitivity Analysis — Dynamic-BABE Model ║")
-    print("╚══════════════════════════════════════════════════╝")
+    print("=" * 54, flush=True)
+    print("  OFAT Sensitivity Analysis — Dynamic-BABE Model", flush=True)
+    print("=" * 54, flush=True)
 
-    results = ofat_sweep(quick=quick)
+    # CLI: --iters=N  --workers=N  --quick  --laptop
+    iterations = None
+    n_workers = None
+    for arg in sys.argv:
+        if arg.startswith("--iters="):
+            iterations = int(arg.split("=", 1)[1])
+        if arg.startswith("--workers="):
+            n_workers = int(arg.split("=", 1)[1])
+
+    if "--laptop" in sys.argv:
+        if iterations is None:
+            iterations = 5
+        if n_workers is None:
+            n_workers = 2
+
+    results = ofat_sweep(quick=quick, iterations=iterations, n_workers=n_workers)
 
     # Export raw results
     csv_path = os.path.join(OUT_DIR, "sensitivity_results.csv")
     results.to_csv(csv_path, index=False)
-    print(f"\n  Raw results: {csv_path}")
+    print(f"\n  Raw results: {csv_path}", flush=True)
 
     # Generate figures
-    print("\nGenerating sensitivity figures...")
+    print("\nGenerating sensitivity figures...", flush=True)
     plot_sensitivity(results)
     plot_sensitivity_heatmap(results)
 
     elapsed = time.perf_counter() - wall_start
-    print(f"\n  Sensitivity analysis complete in {elapsed:.1f}s")
+    print(f"\n  Sensitivity analysis complete in {elapsed:.1f}s", flush=True)
 
 
 if __name__ == "__main__":

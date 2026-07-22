@@ -37,8 +37,12 @@ matplotlib.use("Agg")  # Non-interactive backend for PNG export
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Style
-sns.set_theme(style="whitegrid", font_scale=1.2)
+# Style — target ~800px width for JASSS (figsize inches × dpi)
+sns.set_theme(style="whitegrid", font_scale=1.0)
+FIG_DPI = 100
+FIG_W = 8.0   # 8 in × 100 dpi = 800 px
+FIG_H = 4.0
+SAVE_KW = dict(dpi=FIG_DPI, bbox_inches="tight", pad_inches=0.15)
 
 CONDITIONS = OrderedDict([
     ("Baseline",     {"color": "#E74C3C", "ls": "-"}),      # Red
@@ -102,7 +106,7 @@ def plot_metric(df, metric, ylabel, title, filename,
     if conditions is None:
         conditions = CONDITIONS
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
 
     for condition, style in conditions.items():
         subset = df[df["Condition"] == condition]
@@ -124,10 +128,9 @@ def plot_metric(df, metric, ylabel, title, filename,
 
     ax.set_xlabel("Simulation Step (t)")
     ax.set_ylabel(ylabel)
-    ax.set_title(title, fontweight="bold")
     ax.legend(frameon=True, loc="best")
     plt.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, filename), dpi=300)
+    fig.savefig(os.path.join(OUT_DIR, filename), **SAVE_KW)
     plt.close(fig)
     print("  Saved: {}".format(filename))
 
@@ -146,7 +149,7 @@ def plot_summary_bars(df):
               "Churn Rate\n(%)", "Avg Frustration\n(F_i)",
               "Active Users\n(count)"]
 
-    fig, axes = plt.subplots(1, 5, figsize=(22, 5))
+    fig, axes = plt.subplots(1, 5, figsize=(FIG_W, 3.2))
 
     cond_names = list(CONDITIONS.keys())
     n_conds = len(cond_names)
@@ -188,8 +191,7 @@ def plot_summary_bars(df):
         "Dynamic-BABE Model — Final-Step Comparison (2×2 Factorial, n={} runs/condition)".format(n_runs),
         fontweight="bold", fontsize=13, y=1.02)
     plt.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, "fig5_summary_barplot.png"),
-                dpi=300, bbox_inches="tight")
+    fig.savefig(os.path.join(OUT_DIR, "fig5_summary_barplot.png"), **SAVE_KW)
     plt.close(fig)
     print("  Saved: fig5_summary_barplot.png")
 
@@ -203,7 +205,7 @@ def plot_extremity(agent_df):
         print("  Skipped: figS3_extremity_factorial.png (no Opinion_Extremity data)")
         return
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(FIG_W, FIG_H))
 
     for condition, style in CONDITIONS.items():
         subset = agent_df[agent_df["Condition"] == condition]
@@ -230,7 +232,7 @@ def plot_extremity(agent_df):
     ax.set_title("Opinion Extremity Over Time — 2×2 Factorial", fontweight="bold")
     ax.legend(frameon=True, loc="best")
     plt.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, "figS3_extremity_factorial.png"), dpi=300)
+    fig.savefig(os.path.join(OUT_DIR, "figS3_extremity_factorial.png"), **SAVE_KW)
     plt.close(fig)
     print("  Saved: figS3_extremity_factorial.png")
 
@@ -255,7 +257,7 @@ def plot_trust_dynamics(df):
         print("  Skipped: fig6_trust_dynamics.png (no trust data)")
         return
 
-    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(14, 5))
+    fig, (ax_a, ax_b) = plt.subplots(1, 2, figsize=(FIG_W, FIG_H))
 
     # Panel A — Mean Trust
     for condition, style in _TRUST_CONDITIONS.items():
@@ -311,7 +313,7 @@ def plot_trust_dynamics(df):
     ax_b.legend(frameon=True, loc="best", fontsize=9)
 
     plt.tight_layout()
-    fig.savefig(os.path.join(OUT_DIR, "fig6_trust_dynamics.png"), dpi=300)
+    fig.savefig(os.path.join(OUT_DIR, "fig6_trust_dynamics.png"), **SAVE_KW)
     plt.close(fig)
     print("  Saved: fig6_trust_dynamics.png")
 

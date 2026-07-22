@@ -1,49 +1,57 @@
-\documentclass[14pt]{extarticle}
-\usepackage[utf8]{inputenc}
-\usepackage{setspace}
-\doublespacing
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{graphicx}
-\usepackage{booktabs}
-\usepackage{natbib}
-\usepackage{hyperref}
-\usepackage{geometry}
-\usepackage{microtype}
-\usepackage{authblk}
-\usepackage[font={singlespacing,small},labelfont=bf]{caption}
+% Dynamic-BABE / Polarization Paradox — JASSS Bravo template (v0.6)
+% Compile with pdfLaTeX + BibTeX from this directory (or Overleaf).
+% Set \reviewcopy{false} for the author-identified PDF; use main_blind.tex for referees.
 
+\documentclass{JASSS}
 
-\geometry{a4paper, margin=1in}
-\hypersetup{
-    colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,      
-    urlcolor=cyan,
-    citecolor=blue,
-}
+% Editorial fields (leave untouched until acceptance)
+%\doinum{10.18564/jasss.xxxx}
+%\volume{xx}
+%\issue{x}
+%\article{x}
+%\pubyear{20xx}
+%\received{dd-mmm-yyyy}
+%\accepted{dd-mmm-yyyy}
+%\published{dd-mmm-yyyy}
 
-\title{\textbf{The Polarization Paradox: How Suppressing Backfire Cascades Entrenches Ideological Segregation under Fragile Trust}}
+\title{The Polarization Paradox: How Suppressing Backfire Cascades Entrenches Ideological Segregation under Fragile Trust}
 
-\author[1]{\textbf{Samuel Botshtein}}
-\author[1]{\textbf{Aurnob Ghose}}
-\author[1]{\textbf{Felix Pipal}}
-\author[2]{\textbf{Timothy Ehlinger}}
+% Author-identified copy (blind version: see main_blind.tex)
+\reviewcopy{false}
 
+\author[1]{Samuel Botshtein}
+\author[1]{Aurnob Ghose}
+\author[1]{Felix Pipal}
+\author[2]{Timothy Ehlinger}
 \affil[1]{Independent Researcher}
-\affil[2]{University of Wisconsin-Milwaukee}
+\affil[2]{University of Wisconsin--Milwaukee}
+\email{TODO: corresponding author email}
 
-\date{\today}
+\usepackage{natbib}
+\setcitestyle{authoryear,round,aysep={}}
+
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage[font=small,labelfont=bf]{caption}
+
+% Repo-root figures/ when compiling from paper/
+\graphicspath{{../}{./}}
 
 \begin{document}
-
 \maketitle
 
-\begin{abstract}
-\input{sections/01_abstract.tex}
+\begin{abstract}{%
+\input{sections/01_abstract.tex}%
+}
 \end{abstract}
 
-\clearpage
+\begin{keywords}{agent-based modeling; opinion dynamics; polarization; dyadic trust; algorithmic curation; social media}
+\end{keywords}
+
+\parano{}
 
 \section{Introduction}
 \label{sec:intro}
@@ -57,7 +65,7 @@
 \label{sec:model}
 \input{sections/04_method_odd.tex}
 
-\section{Experimental Design}
+\subsection{Experimental Design}
 \label{sec:experiment}
 \input{sections/05_experimental_design.tex}
 
@@ -73,7 +81,22 @@
 \label{sec:conclusion}
 \input{sections/08_conclusion.tex}
 
-\bibliographystyle{apalike}
+\section*{Code and Data Availability}
+The Dynamic-BABE implementation, batch scripts, analysis pipeline, and figure generators are publicly available at \url{https://github.com/TheCoolSam/BABEModel}. We intend to deposit a reviewed release on the CoMSES Net Computational Model Library so that a permanent handle can accompany the published article.
+
+\section*{Author Biographies}
+\begin{description*}
+\item[Samuel Botshtein.] TODO: author bio (approximately 100 words). Independent researcher.
+\item[Aurnob Ghose.] TODO: author bio (approximately 100 words). Independent researcher.
+\item[Felix Pipal.] TODO: author bio (approximately 100 words). Independent researcher.
+\item[Timothy Ehlinger.] TODO: author bio (approximately 100 words). University of Wisconsin--Milwaukee.
+\end{description*}
+
+\endparano
+
+\theendnotes
+
+\bibliographystyle{jasssbib}
 \bibliography{references}
 
 \end{document}

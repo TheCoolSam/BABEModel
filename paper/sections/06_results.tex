@@ -1,17 +1,16 @@
 % paper/sections/06_results.tex
 % Results Section
 
-This section presents the quantitative findings from our 2$\times$2 factorial simulation experiments, which cross the presence of the platform's \textbf{Bridging Algorithm} (ON vs. OFF) with the presence of the \textbf{Dyadic Trust} co-evolution system (ON vs. OFF). Each of the four resulting experimental conditions---Baseline (Bridge OFF, Trust OFF), Bridge Only (Bridge ON, Trust OFF), Trust Only (Bridge OFF, Trust ON), and the Full Model (Bridge ON, Trust ON)---was simulated for $30$ independent runs of $200$ steps each, initialized using a fixed master seed ($S = 42$) to guarantee strict reproducibility. All statistical comparisons reported below employ the non-parametric Mann-Whitney $U$ test (two-sided) alongside Bonferroni corrections for family-wise error rates, and Cohen's $d$ is computed to quantify standardized effect sizes \citep{Cohen1988}.
+Our $2\times2$ factorial simulation experiments yield clear quantitative patterns. By crossing the platform's \textbf{Bridging Algorithm} (ON vs. OFF) with the co-evolutionary \textbf{Dyadic Trust} framework (ON vs. OFF), we run $30$ independent simulations per condition---each running for $200$ steps. Reproducibility uses base seed $42$, with run $i$ initialized at seed $42+i$. To compare these states, we employ two-sided, non-parametric Mann-Whitney $U$ tests backed by Bonferroni corrections, and compute Cohen's $d$ to quantify standardized effect sizes \citep{Cohen1988}. Large Cohen's $d$ values for churn and revenue reflect nearly non-overlapping condition distributions rather than subtle mean shifts; we therefore emphasize absolute mean differences alongside standardized effects.
 
 \subsection{The Polarization Paradox: Short-Term Monetization vs. Long-Term Alignment}
-The first set of analyses examines the direct system-level consequences of deploying a bridging algorithm in the absence of co-evolving interpersonal trust, comparing the \textbf{Baseline} and \textbf{Bridge Only} conditions. Our results reveal a profound and striking tension between platform-level economic preservation and societal-level ideological consensus---a phenomenon we define as the \textbf{Polarization Paradox}. 
+We begin by comparing the \textbf{Baseline} and \textbf{Bridge Only} conditions, isolating the impact of algorithmic feed moderation when network trust remains static. The simulations demonstrate a tension between a platform's short-term financial retention and long-term ideological alignment---a structural deadlock we term the \textbf{Polarization Paradox}.
 
 \subsubsection{User Retention and Platform Revenue}
-In the Baseline condition, where no moderation is present to suppress ideological conflict, the exposure of entrenched agents to opposing views drives extreme psychological friction. The cumulative user churn rate reaches a devastating mean of $39.18\%$ ($\text{SD} = 2.27\%$, $95\%\ \text{CI} = [38.39\%, 39.98\%]$) by step $200$. This high level of user flight significantly reduces the active user population from the initial $500$ agents to a final mean of $304.1$ active users ($\text{SD} = 11.35$, $95\%\ \text{CI} = [300.10, 308.03]$). 
 
-Concomitantly, the average frustration among the remaining active users escalates to $0.9668$ ($\text{SD} = 0.1669$, $95\%\ \text{CI} = [0.9055, 1.0239]$). This massive user attrition severely harms the platform's financial viability: the final step-wise revenue under the Baseline condition collapses to a mean of $\$121.64$ ($\text{SD} = \$4.54$, $95\%\ \text{CI} = [\$120.04, \$123.21]$).
+In the unmoderated \textbf{Baseline}, cumulative churn reaches $39.18\%$ ($\text{SD} = 2.27\%$, $95\%\ \text{CI} = [38.39\%, 39.98\%]$) by step $200$, leaving only $304.1$ active users on average ($\text{SD} = 11.35$, $95\%\ \text{CI} = [300.10, 308.03]$). Frustration among the survivors rises to $0.9668$ ($\text{SD} = 0.1669$, $95\%\ \text{CI} = [0.9055, 1.0239]$). This user flight depresses platform economics: final step-wise revenue falls to a mean of \$121.64 ($\text{SD} = \$4.54$, $95\%\ \text{CI} = [\$120.04, \$123.21]$).
 
-In stark contrast, activating the bridging algorithm (\textbf{Bridge Only} condition) almost entirely halts user churn. Under this condition, the cumulative churn rate drops precipitously to a mere $0.38\%$ ($\text{SD} = 0.30\%$, $95\%\ \text{CI} = [0.27\%, 0.49\%]$) at step $200$ (see Figure~\ref{fig:churn}). This drop in user flight is statistically robust and represents an exceptionally large effect size: Mann-Whitney $U = 900.0$, $p_{\text{adjusted}} < 1.5 \times 10^{-9}$, Cohen's $d = 23.97$. Consequently, the platform retains nearly its entire user base, maintaining an active user count of $498.1$ agents ($\text{SD} = 1.52$, $95\%\ \text{CI} = [497.57, 498.63]$). 
+Activating the bridging algorithm (\textbf{Bridge Only} condition) changes retention sharply. Cumulative churn falls to $0.38\%$ ($\text{SD} = 0.30\%$, $95\%\ \text{CI} = [0.27\%, 0.49\%]$) at step $200$ (see Figure~\ref{fig:churn}). The contrast is highly significant: Mann-Whitney $U = 900.0$, $p_{\text{adjusted}} < 1.5 \times 10^{-9}$, Cohen's $d = 23.97$. The platform retains $498.1$ active users ($\text{SD} = 1.52$, $95\%\ \text{CI} = [497.57, 498.63]$)---nearly the full population.
 
 \begin{figure}[htbp]
     \centering
@@ -20,10 +19,10 @@ In stark contrast, activating the bridging algorithm (\textbf{Bridge Only} condi
     \label{fig:churn}
 \end{figure}
 
-This near-perfect retention is driven by a massive reduction in behavioral frustration, which falls to a mean of $0.5819$ ($\text{SD} = 0.0576$, $95\%\ \text{CI} = [0.5617, 0.6024]$, Mann-Whitney $U = 871.0$, $p_{\text{adjusted}} < 3.1 \times 10^{-8}$, Cohen's $d = 3.08$). Relieved of toxic conflict, the platform's final step-wise revenue is successfully preserved, reaching a mean of $\$199.24$ ($\text{SD} = \$0.61$, $95\%\ \text{CI} = [\$199.03, \$199.45]$, Mann-Whitney $U = 0.0$, $p_{\text{adjusted}} < 1.5 \times 10^{-9}$, Cohen's $d = -23.97$). Financially and operationally, the bridging algorithm functions exactly as designed: it successfully keeps users engaged, dampens frustration, and maximizes advertising throughput.
+Algorithmic shielding lowers mean frustration among active users to $0.5819$ ($\text{SD} = 0.0576$, $95\%\ \text{CI} = [0.5617, 0.6024]$, Mann-Whitney $U = 871.0$, $p_{\text{adjusted}} < 3.1 \times 10^{-8}$, Cohen's $d = 3.08$). Retaining users stabilizes final step-wise revenue at \$199.24 ($\text{SD} = \$0.61$, $95\%\ \text{CI} = [\$199.03, \$199.45]$, Mann-Whitney $U = 0.0$, $p_{\text{adjusted}} < 1.5 \times 10^{-9}$, Cohen's $d = -23.97$). This approximately $64\%$ revenue increase is driven by retention of active users rather than improved feed safety. Because the initial society is pre-polarized ($\sigma(0) \approx 0.7 > 0.6$), the stylized brand-safety multiplier remains in the unsafe regime ($M_{\text{safety}} = 0.4$) for both conditions. The financial benefit is therefore demographic: the algorithm keeps users active and preserves ad impressions even when content remains polarized.
 
 \subsubsection{The Paradoxical Ideological Backlash}
-However, an inspection of the ideological landscape reveals the paradox. Rather than pacifying the network, the suppression of backfire interactions leads to a statistically significant \textit{increase} in global ideological polarization. In the Baseline condition, the final-step polarization $\sigma$ settled at a mean of $0.9550$ ($\text{SD} = 0.0389$, $95\%\ \text{CI} = [0.9409, 0.9683]$). Under the Bridge Only condition, final-step polarization rises to $0.9904$ ($\text{SD} = 0.0042$, $95\%\ \text{CI} = [0.9888, 0.9918]$), representing a large and highly significant increase (Mann-Whitney $U = 135.0$, $p_{\text{adjusted}} < 0.0002$, Cohen's $d = -1.28$; see Figure~\ref{fig:polarization}).
+Beneath the financial surface, filtering confrontational interactions yields a statistically significant \textit{increase} in global ideological polarization. Baseline polarization $\sigma$ settles at a mean of $0.9550$ ($\text{SD} = 0.0389$, $95\%\ \text{CI} = [0.9409, 0.9683]$), while Bridge Only raises final-step polarization to $0.9904$ ($\text{SD} = 0.0042$, $95\%\ \text{CI} = [0.9888, 0.9918]$)---a significant increase (Mann-Whitney $U = 135.0$, $p_{\text{adjusted}} < 0.0002$, Cohen's $d = -1.28$; see Figure~\ref{fig:polarization}).
 
 \begin{figure}[htbp]
     \centering
@@ -32,22 +31,20 @@ However, an inspection of the ideological landscape reveals the paradox. Rather 
     \label{fig:polarization}
 \end{figure}
 
-This counterintuitive outcome arises from a structural selection effect. In the Baseline condition, highly extreme and entrenched agents frequently interact with their ideological opponents, experience unmitigated backfire cascades, accumulate high levels of frustration, and ultimately churn. Their permanent exit from the network mathematically truncates the distribution's extremes, artificially lower-bounding global polarization. 
+A structural selection effect explains this phenomenon. In the unmoderated Baseline, extreme, dogmatic agents repeatedly clash with their opponents. These interactions trigger backfires, pile up frustration, and drive agents to churn. Their permanent exit mathematically clips the tails of the opinion distribution, capping global polarization.
 
-By contrast, the bridging algorithm shields these highly extreme, entrenched users from frustration, allowing them to remain active indefinitely. As these extreme agents remain on the platform, they continue to pull their locally connected neighbors toward the ideological poles, preventing any consensus from forming. By suppressing the behavioral symptoms of polarization (exit and frustration), the bridging algorithm preserves the extreme voices, ultimately locking the entire social system into an ideological deadlock.
+By contrast, the bridging algorithm isolates extreme users from frustration and keeps them active. Retained ideologues continue to pull neighbors toward the extremes, reducing the chance of consensus. By mitigating the symptoms of polarization---exit and frustration---the algorithm can preserve high systemic dispersion, locking the system in ideological deadlock.
 
 \subsection{Trust Segregation: The Relational Cost of Social Judgments}
-When we enable the co-evolution of dyadic trust (\textbf{Trust Only} condition), we observe a dramatic structural transformation of the relational network. In this condition, trust is not a static parameter but a dynamic link attribute that co-evolves with dialogue. 
+Enabling dyadic trust (\textbf{Trust Only} condition) triggers a dramatic structural transformation. Trust co-evolves with dialogue as a dynamic link attribute, reshaping the network's qualitative architecture.
 
-In the Baseline condition, trust is not modeled and remains fixed at a nominal value of $0.5$ across all edges, yielding a flat trust landscape where ingroup and outgroup trust are identical, and the trust segregation ratio is exactly $1.00$. 
+In our Baseline, trust remains locked at a static nominal value of $0.5$ across all edges, presenting a flat relational landscape where ingroup and outgroup trust are identical (yielding a segregation ratio of exactly $1.00$).
 
-However, under the Trust Only condition, the co-evolution of opinions and trust leads to a stark polarization of relationships (see Figure~\ref{fig:trust_seg}). Ingroup trust (trust between agents who share the same opinion pole) climbs to a near-perfect mean of $0.9814$ ($\text{SD} = 0.0055$, $95\%\ \text{CI} = [0.9794, 0.9832]$). Conversely, outgroup trust (trust between agents with opposite opinion poles) completely collapses, dropping to a mean of $0.0415$ ($\text{SD} = 0.0256$, $95\%\ \text{CI} = [0.0331, 0.0511]$).
+Under the Trust Only condition, co-evolving opinions and trust split the network into relational camps (see Figure~\ref{fig:trust_seg}). Ingroup trust---the trust linking agents sharing the same opinion pole---climbs to a near-perfect mean of $0.9814$ ($\text{SD} = 0.0055$, $95\%\ \text{CI} = [0.9794, 0.9832]$). Conversely, outgroup trust completely collapses, bottoming out at a mean of $0.0415$ ($\text{SD} = 0.0256$, $95\%\ \text{CI} = [0.0331, 0.0511]$).
 
-This extreme divergence in relational capital manifests in a massive surge in the network's Trust Segregation Ratio, which reaches a mean of $35.61$ ($\text{SD} = 31.50$, $95\%\ \text{CI} = [26.29, 47.64]$). Compared to the Baseline, this represents an exceptionally large effect size: Mann-Whitney $U = 0.0$, $p_{\text{adjusted}} < 7.3 \times 10^{-11}$, Cohen's $d = -1.55$. 
+This relational divergence raises the Trust Segregation Ratio to a mean of $35.61$ ($\text{SD} = 31.50$, $95\%\ \text{CI} = [26.29, 47.64]$). Because the ratio is heavy-tailed (maximum $\approx 175$ across runs), we also report the median and interquartile range: median $= 28.58$, $\text{IQR} = [19.06, 40.61]$. Compared to the Baseline, the effect is large: Mann-Whitney $U = 0.0$, $p_{\text{adjusted}} < 7.3 \times 10^{-11}$, Cohen's $d = -1.55$. These figures describe the Trust Only vs.\ Baseline contrast (enabling trust co-evolution), not a bridging effect.
 
-This relational division highlights the dual role of trust. Within ideological camps, trust functions as a powerful constructive glue: high ingroup trust increases the perceived influence weight $w_{ij}$, promoting consensus and smoothing over minor internal disagreements (the ``friends can argue'' buffer). 
-
-Across ideological camps, however, the asymmetry of trust co-evolution ($\delta_- / \delta_+ = 2.5$) acts as a destructive solvent. The rapid relational penalty incurred during backfire events outpaces the slow build-up of trust during agreement, leading to a rapid erosion of cross-cutting ties. Combined with passive decay ($\lambda = 0.001$), cross-camp trust is systematically eradicated, leaving the network structurally segregated into two highly cohesive but mutually hostile relational silos.
+This segregation exposes the double-edged role of trust. Inside ideological camps, high ingroup trust increases the influence weight $w_{ij}$, buffering minor disagreements via a ``friends can argue'' mechanism. Across camps, the asymmetry of trust co-evolution ($\delta_- / \delta_+ = 2.5$) erodes cross-cutting ties faster than agreement can rebuild them. Combined with passive decay ($\lambda = 0.001$), outgroup trust collapses and the network segregates into two cohesive but mutually hostile relational silos.
 
 \begin{figure}[htbp]
     \centering
@@ -57,46 +54,46 @@ Across ideological camps, however, the asymmetry of trust co-evolution ($\delta_
 \end{figure}
 
 \subsection{Moderation Analysis: The Bridge \texorpdfstring{$\times$}{x} Trust Interaction}
-To test the central theoretical contribution of our study---whether the presence of dyadic trust moderates the systemic impact of the bridging algorithm---we executed a seed-paired interaction analysis. Because our batch runs are paired by random seed, we can compute the paired differences in final metrics to isolate how the bridging algorithm's effect changes in the presence of co-evolving trust:
+To test whether co-evolving dyadic trust moderates the impact of algorithmic content moderation, we perform a seed-paired interaction analysis. Because runs share random seeds, we compute paired differences in final metrics:
 \begin{align}
     \Delta_{\text{alone}} &= \text{Metric}(\text{Bridge Only}) - \text{Metric}(\text{Baseline}) \\
     \Delta_{\text{with trust}} &= \text{Metric}(\text{Full Model}) - \text{Metric}(\text{Trust Only})
 \end{align}
-Comparing these two distributions of differences using Mann-Whitney $U$ tests reveals a series of highly significant and theoretically critical Bridge $\times$ Trust interaction effects (see Table~\ref{tab:interaction}).
+We then apply a Wilcoxon signed-rank test to the per-seed contrast $\Delta_{\text{with trust}} - \Delta_{\text{alone}}$, which matches the paired design (see Table~\ref{tab:interaction}).
 
 \begin{table}[htbp]
 \centering
+\footnotesize
 \caption{Bridge $\times$ Trust Interaction Analysis (Seed-Paired Differences)}
 \label{tab:interaction}
-\resizebox{\textwidth}{!}{%
 \begin{tabular}{lccccc}
 \toprule
-\textbf{Metric} & \textbf{Mean Effect Alone ($\Delta_{\text{alone}}$)} & \textbf{Mean Effect w/Trust ($\Delta_{\text{with trust}}$)} & \textbf{Interaction Cohen's $d$} & \textbf{U-statistic} & \textbf{$p$-value (adjusted)} \\
+ & \textbf{Effect Alone} & \textbf{Effect w/Trust} & \textbf{Interaction} & & \\
+\textbf{Metric} & \textbf{($\Delta_{\text{alone}}$)} & \textbf{($\Delta_{\text{with trust}}$)} & \textbf{Cohen's $d$} & \textbf{$W$-statistic} & \textbf{Adj. $p$-value} \\
 \midrule
-Active Users & $+194.0$ & $+190.1$ & $-0.3508$ & $548.0$ & $1.0000$ \\
-Avg. Frustration & $-0.3849$ & $-0.3981$ & $-0.0739$ & $456.0$ & $1.0000$ \\
-Churn Rate & $-38.80\%$ & $-38.02\%$ & $+0.3508$ & $352.0$ & $1.0000$ \\
-Ingroup Trust & $0.0000$ & $-0.0114$ & $-2.6925$ & $870.0$ & $< 3.4 \times 10^{-10}$ \\
-Mean Trust & $0.0000$ & $+0.0300$ & $+4.8926$ & $0.0$ & $< 1.3 \times 10^{-11}$ \\
-Outgroup Trust & $0.0000$ & $-0.0127$ & $-0.8219$ & $660.0$ & $0.0093$ \\
-Polarization & $+0.0353$ & $+0.0322$ & $-0.0887$ & $454.0$ & $1.0000$ \\
-Revenue & $+\$77.60$ & $+\$76.04$ & $-0.3508$ & $550.5$ & $1.0000$ \\
-Trust Segregation & $0.0000$ & $+1.9854$ & $+0.0902$ & $240.0$ & $0.0093$ \\
+Active Users & $+194.0$ & $+190.1$ & $-0.3508$ & $112.5$ & $0.1346$ \\
+Avg. Frustration & $-0.3849$ & $-0.3981$ & $-0.0739$ & $198.0$ & $1.0000$ \\
+Churn Rate & $-38.80\%$ & $-38.02\%$ & $+0.3508$ & $116.5$ & $0.1698$ \\
+Ingroup Trust & $0.0000$ & $-0.0114$ & $-2.6925$ & $4.0$ & $< 1.4 \times 10^{-7}$ \\
+Mean Trust & $0.0000$ & $+0.0300$ & $+4.8926$ & $0.0$ & $< 1.9 \times 10^{-8}$ \\
+Outgroup Trust & $0.0000$ & $-0.0127$ & $-0.8219$ & $97.0$ & $0.0434$ \\
+Polarization & $+0.0353$ & $+0.0322$ & $-0.0887$ & $187.0$ & $1.0000$ \\
+Revenue & $+\$77.60$ & $+\$76.04$ & $-0.3508$ & $106.5$ & $0.0954$ \\
+Trust Segregation & $0.0000$ & $+1.9854$ & $+0.0902$ & $135.0$ & $0.4491$ \\
 \bottomrule
 \end{tabular}%
-}
 \end{table}
 
-\paragraph{Active Users, Frustration, and Churn:} The interaction effects on physical user retention metrics (Active Users, Churn Rate, and Avg. Frustration) and financial performance (Revenue) are statistically non-significant after Bonferroni correction ($p_{\text{adjusted}} = 1.0000$). The bridging algorithm retains its powerful physical and economic protective effects regardless of whether trust is enabled: it consistently rescues approximately $190$ to $194$ users from churning, decreases frustration by $\approx 0.39$, and preserves $\approx \$76.00$ in step-wise revenue.
+\subsubsection{Active Users, Frustration, and Churn:}
+Interaction effects on physical user retention (Active Users, Churn Rate, and Avg.\ Frustration) and financial performance (Revenue) remain non-significant after Bonferroni correction in the seed-paired analysis. The bridging algorithm's retention benefits are similar with or without trust co-evolution: it rescues approximately $190$ to $194$ users from churning, reduces frustration by $\approx 0.39$, and preserves $\approx \$76$ in step-wise revenue.
 
-\paragraph{Outgroup Trust and Trust Segregation:} Crucially, we find a highly significant interaction effect on relational variables. The bridging algorithm's effect on \textbf{Outgroup Trust} is significantly moderated by trust co-evolution (Interaction Cohen's $d = -0.8219$, Mann-Whitney $U = 660.0$, $p_{\text{adjusted}} = 0.0093$). While the bridging algorithm has a nominal effect of $0.0$ on outgroup trust in the absence of a trust system, when trust is enabled, the addition of the bridging algorithm (\textbf{Full Model} condition) \textit{significantly drives outgroup trust even lower}, decreasing it by an average of $-0.0127$ (dropping from a mean of $0.0415$ in the Trust Only condition to a final mean of $0.0288$, $\text{SD} = 0.0108$, in the Full Model).
+\subsubsection{Outgroup Trust and Trust Segregation:}
+Relational metrics show a nuanced pattern. Seed-paired Wilcoxon tests find a significant Bridge $\times$ Trust interaction for \textbf{Outgroup Trust} ($W = 97.0$, $p_{\text{adjusted}} = 0.0434$, interaction $d = -0.82$): when trust co-evolves, the bridge effect on outgroup trust is a small mean reduction of $-0.0127$ (Full Model $0.0288$ vs.\ Trust Only $0.0415$). By contrast, the Trust Segregation interaction is \textbf{not significant} after Bonferroni correction ($W = 135.0$, $p_{\text{adjusted}} = 0.4491$, $d \approx 0.09$). Pairwise Full Model vs.\ Trust Only contrasts for both Outgroup Trust and Trust Segregation are also non-significant after Bonferroni correction ($p_{\text{adjusted}} = 1.000$).
 
-Correspondingly, we find a highly significant interaction effect on the \textbf{Trust Segregation Ratio} (Mann-Whitney $U = 240.0$, $p_{\text{adjusted}} = 0.0093$). When combined with trust co-evolution, the bridging algorithm further \textit{intensifies} relational segregation, increasing the Trust Segregation Ratio by an additional $+1.9854$ (from a mean of $35.61$ in the Trust Only condition to a final mean of $37.5992$, $\text{SD} = 11.47$, in the Full Model).
-
-This is a key empirical result. By suppressing cross-cutting, negative-affect interactions, the bridging algorithm successfully prevents the behavioral explosion of frustration and churn. However, this algorithmic intervention does not build mutual tolerance. Because the algorithm intercepts conflict and replaces it with silence (Zone 2, non-commitment), agents are deprived of the opportunity to engage in constructive debate, learn from disagreements, or rebuild trust. Instead, they are left in a state of mutual isolation. Over time, the lack of active, constructive contact, combined with passive relationship decay ($\lambda = 0.001$), slowly and relentlessly erodes whatever fragile cross-ideological trust remains, leading to a relational network that is even more deeply segregated than one without any moderation at all.
+We therefore treat bridging's relational side-effects as modest and method-dependent: retention benefits are robust, while claims of intensified segregation under the Full Model are not supported by the paired Wilcoxon interaction test or by pairwise condition contrasts. Mechanistically, bridging can replace rejection-zone events with Zone~2 silence (no trust rebuild) and retain agents who would otherwise churn, leaving ties exposed to passive decay ($\lambda = 0.001$); these mechanisms can shift descriptive means without producing a large, reliably detected segregation interaction.
 
 \subsection{Echo Chambers: Emergent Structural Clustering}
-To analyze how these cognitive and relational dynamics reshape the topological communication patterns of the platform, we observe the \textbf{Opinion-Weighted Clustering Coefficient} (see Figure~\ref{fig:clustering}). This metric quantifies the local density of triadic relationships where all three connected agents share the same opinion pole, serving as a direct measure of structural echo chambers.
+To analyze how these cognitive and relational forces reshape the topological communication patterns of the platform, we track the \textbf{Opinion-Weighted Clustering Coefficient} (see Figure~\ref{fig:clustering}). This metric measures the local density of triadic relationships where all three connected agents share the same opinion pole---serving as a direct indicator of structural echo chambers.
 
 \begin{figure}[htbp]
     \centering
@@ -105,12 +102,12 @@ To analyze how these cognitive and relational dynamics reshape the topological c
     \label{fig:clustering}
 \end{figure}
 
-In the Baseline condition, the final mean opinion-weighted clustering coefficient is $0.1040$ ($\text{SD} = 0.0209$, $95\%\ \text{CI} = [0.0968, 0.1115]$). When the trust co-evolution system is enabled alone (\textbf{Trust Only}), structural clustering remains statistically unchanged at a mean of $0.1050$ ($\text{SD} = 0.0237$, $95\%\ \text{CI} = [0.0968, 0.1134]$, Mann-Whitney $U = 420.0$, $p_{\text{adjusted}} = 1.0000$, Cohen's $d = -0.05$). This indicates that trust co-evolution on its own, despite severely segregating relationships, does not change the physical clustering of opinions beyond the baseline scale-free structure.
+In our Baseline, the final mean opinion-weighted clustering coefficient settles at $0.1040$ ($\text{SD} = 0.0209$, $95\%\ \text{CI} = [0.0968, 0.1115]$). When we activate trust co-evolution alone (\textbf{Trust Only}), clustering remains statistically unchanged at a mean of $0.1050$ ($\text{SD} = 0.0237$, $95\%\ \text{CI} = [0.0968, 0.1134]$, Mann-Whitney $U = 420.0$, $p_{\text{adjusted}} = 1.0000$, Cohen's $d = -0.05$). This static result shows that trust co-evolution alone, despite locking relationships into hostile camps, does not alter the physical clustering of opinions beyond the baseline scale-free structure.
 
-However, when the bridging algorithm is activated, we observe a highly significant and substantial decrease in structural clustering. In the \textbf{Bridge Only} condition, opinion-weighted clustering drops to a mean of $0.0829$ ($\text{SD} = 0.0152$, $95\%\ \text{CI} = [0.0774, 0.0881]$), representing a significant decrease relative to the Baseline (Mann-Whitney $U = 721.0$, $p_{\text{adjusted}} = 0.0038$, Cohen's $d = 1.16$). 
+Deploying the bridging algorithm reduces structural clustering. Under the \textbf{Bridge Only} condition, opinion-weighted clustering drops to a mean of $0.0829$ ($\text{SD} = 0.0152$, $95\%\ \text{CI} = [0.0774, 0.0881]$)---a significant decline relative to the Baseline (Mann-Whitney $U = 721.0$, $p_{\text{adjusted}} = 0.0038$, Cohen's $d = 1.16$).
 
-Similarly, in the \textbf{Full Model} condition (Bridge ON, Trust ON), the opinion-weighted clustering coefficient settles at a mean of $0.0866$ ($\text{SD} = 0.0137$, $95\%\ \text{CI} = [0.0816, 0.0914]$), which is also a significant reduction compared to the Baseline (Mann-Whitney $U = 681.0$, $p_{\text{adjusted}} = 0.0393$, Cohen's $d = 0.98$).
+Similarly, under the \textbf{Full Model} (Bridge ON, Trust ON), opinion-weighted clustering settles at a mean of $0.0866$ ($\text{SD} = 0.0137$, $95\%\ \text{CI} = [0.0816, 0.0914]$), also significantly below Baseline (Mann-Whitney $U = 681.0$, $p_{\text{adjusted}} = 0.0393$, Cohen's $d = 0.98$).
 
-This structural shift occurs because the bridging algorithm, by intercepting and neutralizing extreme backfires, dampens the rate at which agents are repelled toward absolute ideological extremes. While the global polarization remains extremely high (due to the retention of extreme users who would have otherwise churned), the local clusters are slightly less uniform because agents are spared the extreme repulsive forces that drive absolute ideological homogeneity in tight neighborhoods. 
+This shift occurs because bridging intercepts many extreme backfires and dampens local repulsion. Global polarization can remain high because dogmatic users who would otherwise exit are retained, while local triangles become slightly less homogeneous.
 
-However, this lower clustering does not represent a cure for polarization. Rather, it represents an artificial preservation of a fragile, ideologically deadlocked, and relationally hollowed-out network: a system where agents remain physically connected in triangles, but where their interpersonal trust is strictly partitioned, and all cross-cutting channels are completely dry.
+Lower clustering should not be read as systemic resolution. Agents may remain connected in triangles while interpersonal trust stays partitioned and many cross-cutting channels are inactive.

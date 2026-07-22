@@ -22,3 +22,17 @@ figures/*.png
 output/statistical_analysis.csv
 output/interaction_analysis.csv
 output/sensitivity_results.csv
+
+# Legacy pre-factorial CSVs (quarantined; not part of 2x2 design)
+output/legacy/
+
+# Local TeX tooling / build scratch
+tools/
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.ent
+paper/*.synctex.gz
+submission_jasss/

@@ -1,0 +1,81 @@
+% Anonymised review copy for JASSS referees.
+% Compile with pdfLaTeX + BibTeX from this directory (or Overleaf).
+
+\documentclass{JASSS}
+
+\title{The Polarization Paradox: How Suppressing Backfire Cascades Entrenches Ideological Segregation under Fragile Trust}
+
+\reviewcopy{true}
+
+% Authors retained in source for the author PDF; suppressed by \reviewcopy{true}
+\author[1]{Anonymised}
+\affil[1]{Anonymised}
+\email{anonymised@example.com}
+
+\usepackage{natbib}
+\setcitestyle{authoryear,round,aysep={}}
+
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage[font=small,labelfont=bf]{caption}
+
+\graphicspath{{../}{./}}
+
+% Flag consumed by section files to strip identifying URLs
+\newcommand{\BlindSubmission}{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}{%
+\input{sections/01_abstract.tex}%
+}
+\end{abstract}
+
+\begin{keywords}{agent-based modeling; opinion dynamics; polarization; dyadic trust; algorithmic curation; social media}
+\end{keywords}
+
+\parano{}
+
+\section{Introduction}
+\label{sec:intro}
+\input{sections/02_introduction.tex}
+
+\section{Related Work}
+\label{sec:related}
+\input{sections/03_related_work.tex}
+
+\section{Model Description (ODD+D Protocol)}
+\label{sec:model}
+\input{sections/04_method_odd.tex}
+
+\subsection{Experimental Design}
+\label{sec:experiment}
+\input{sections/05_experimental_design.tex}
+
+\section{Results}
+\label{sec:results}
+\input{sections/06_results.tex}
+
+\section{Discussion}
+\label{sec:discussion}
+\input{sections/07_discussion.tex}
+
+\section{Conclusion}
+\label{sec:conclusion}
+\input{sections/08_conclusion.tex}
+
+\section*{Code and Data Availability}
+An anonymised replication archive (model code, batch scripts, analysis pipeline, and figure generators) will be provided to the editors for peer review. Upon acceptance, a reviewed release will be deposited on the CoMSES Net Computational Model Library so that a permanent handle can accompany the published article.
+
+\endparano
+
+\theendnotes
+
+\bibliographystyle{jasssbib}
+\bibliography{references}
+
+\end{document}
