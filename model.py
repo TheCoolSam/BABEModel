@@ -5,7 +5,7 @@ Implementations of the full model:
   * Barabasi-Albert network generation
   * Per-tick agent interaction loop
   * NOVEL: Dyadic Trust co-evolution (symmetric)
-  * Bridge Algorithm interception (toggle)
+  * Suppression filter interception (code flag enable_bridge)
   * Revenue step-function computation
   * Echo Chamber detection metrics
   * Mesa DataCollector for all KPIs
@@ -259,7 +259,7 @@ class SocialNetworkModel(Model):
     ----------
     num_agents      : population size  (default from config)
     ba_m            : Barabasi-Albert edge parameter
-    enable_bridge   : activate the Bridge Algorithm dampener
+    enable_bridge   : activate the suppression-oriented feed filter
     seed            : master RNG seed for full reproducibility
     """
 
@@ -443,14 +443,14 @@ class SocialNetworkModel(Model):
         alignment = agent_i.compute_alignment(agent_j)
         w_ij = agent_i.compute_influence_weight(alignment)
         if w_ij > 0:
-            mu = w_ij / (1.0 + agent_i.beta)
+            mu = min(1.0, max(0.0, w_ij / (1.0 + agent_i.beta)))
             agent_i.opinion = np.clip(
                 agent_i.opinion + mu * (agent_j.opinion - agent_i.opinion),
                 -1.0,
                 1.0,
             )
         else:
-            repulsion = abs(w_ij) / (1.0 + agent_i.beta)
+            repulsion = min(1.0, abs(w_ij) / (1.0 + agent_i.beta))
             away = agent_i.opinion - agent_j.opinion
             agent_i.opinion = np.clip(
                 agent_i.opinion + repulsion * away, -1.0, 1.0
@@ -461,6 +461,8 @@ class SocialNetworkModel(Model):
         alignment = agent_i.compute_alignment(agent_j)
         w_ij = agent_i.compute_influence_weight(alignment)
 
+        # Trust OFF: omit gamma_T * T from w_ij (no fixed T=0.5 term).
+        # Trust ON: add the trust buffer to the influence weight.
         if self.enable_trust:
             trust = agent_i.get_trust(agent_j)
             w_ij = w_ij + cfg.TRUST_INFLUENCE * trust

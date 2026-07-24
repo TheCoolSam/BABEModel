@@ -1,133 +1,105 @@
 % paper/sections/06_results.tex
 % Results Section
 
-Our $2\times2$ experiments cross the suppression filter (ON/OFF; factorial labels Bridge ON/OFF) with dyadic trust (ON/OFF). Each cell has $30$ runs of $200$ steps with seed $42+i$ for run $i$. We compare final metrics with Mann--Whitney $U$ tests (Bonferroni-corrected over $\sim 60$ pairwise tests) and Cohen's $d$~\citep{Cohen1988} as a parametric complement. Very large $d$ values for churn and revenue reflect nearly separated distributions; we therefore also report absolute means. Primary polarization $\sigma$ is computed over \emph{active} agents; we also report full-cohort $\sigma_{\mathrm{all}}$ (churned agents retain last opinions).
+Our $2\times2$ experiments cross the Suppression Filter (ON/OFF) with dyadic trust (ON/OFF). Each cell has $30$ runs of $200$ steps with seed $42+i$ for run $i$. Primary pairwise inference uses seed-paired Wilcoxon signed-rank tests with Bonferroni correction over $m=62$ non-degenerate contrasts (identically flat trust-KPI cells when Trust OFF are excluded from $m$); Mann--Whitney $U$ is supplementary only. Cohen's $d$ uses $(\bar x_1-\bar x_2)/\mathrm{SD}_{\mathrm{pooled}}$. For near-separated churn and revenue we emphasize mean differences and CIs; very large $|d|$ signals separation. Primary polarization $\sigma$ is over \emph{active} agents; $\sigma_{\mathrm{all}}$ retains last opinions of churned agents.
 
-\subsection{The Polarization Paradox: Short-Term Monetization vs. Long-Term Alignment}
-We begin by comparing the \textbf{Baseline} and \textbf{Bridge Only} conditions, isolating the impact of the suppression filter when network trust remains static. The simulations demonstrate a tension between a platform's short-term financial retention and long-term ideological alignment---a structural deadlock we term the \textbf{Polarization Paradox}.
+\subsection{The Polarization Paradox: Retention vs.\ Active-User Dispersion}
+We begin with \textbf{Baseline} vs.\ \textbf{Filter Only}, isolating the Suppression Filter when trust is off. The tension between short-term retention and active-user polarization is the \textbf{Polarization Paradox}.
 
 \subsubsection{User Retention and Platform Revenue}
 
-In the unmoderated \textbf{Baseline}, cumulative churn reaches $39.18\%$ ($\text{SD} = 2.27\%$, $95\%\ \text{CI} = [38.39\%, 39.98\%]$) by step $200$, leaving only $304.1$ active users on average ($\text{SD} = 11.35$, $95\%\ \text{CI} = [300.10, 308.03]$). Frustration among the survivors rises to $0.9668$ ($\text{SD} = 0.1669$, $95\%\ \text{CI} = [0.9055, 1.0239]$). This user flight depresses platform economics: final step-wise revenue falls to a mean of \$121.64 ($\text{SD} = \$4.54$, $95\%\ \text{CI} = [\$120.04, \$123.21]$).
+In the unmoderated \textbf{Baseline}, cumulative churn reaches $39.18\%$ ($\text{SD} = 2.27\%$, $95\%\ \text{CI} = [38.39\%, 39.98\%]$) by step $200$, leaving $304.1$ active users on average ($\text{SD} = 11.35$, $95\%\ \text{CI} = [300.10, 308.03]$). Frustration among survivors is $0.9668$ ($\text{SD} = 0.1669$, $95\%\ \text{CI} = [0.9055, 1.0239]$). Final step-wise revenue averages \$121.64 ($\text{SD} = \$4.54$, $95\%\ \text{CI} = [\$120.04, \$123.21]$) under the constant unsafe multiplier.
 
-Activating the suppression filter (\textbf{Bridge Only} condition) changes retention sharply. Cumulative churn falls to $0.38\%$ ($\text{SD} = 0.30\%$, $95\%\ \text{CI} = [0.27\%, 0.49\%]$) at step $200$ (see Figure~\ref{fig:churn}). The contrast is highly significant: Mann-Whitney $U = 900.0$, $p_{\text{adjusted}} < 1.7 \times 10^{-9}$, Cohen's $d = 23.97$. The platform retains $498.1$ active users ($\text{SD} = 1.52$, $95\%\ \text{CI} = [497.57, 498.63]$)---nearly the full population.
+Activating the Suppression Filter (\textbf{Filter Only}) cuts churn to $0.38\%$ ($\text{SD} = 0.30\%$, $95\%\ \text{CI} = [0.27\%, 0.49\%]$; Figure~\ref{fig:churn}). Seed-paired Wilcoxon $W = 0.0$, $p_{\text{adjusted}} < 1.1 \times 10^{-4}$, Cohen's $d = 23.97$ (near-complete separation). Active users rise to $498.1$ ($\text{SD} = 1.52$, $95\%\ \text{CI} = [497.57, 498.63]$).
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.58\textwidth]{figures/fig3_churn_factorial.png}
-    \caption{Cumulative user churn rate over time across the four experimental conditions ($N=500$, $30$ runs per condition). The Bridge ON conditions show near-zero user flight ($0.38\%$), while the Bridge OFF conditions display high user attrition ($\approx 39\%$). Error ribbons indicate $95\%$ confidence intervals.}
+    \caption{Cumulative user churn rate over time ($N=500$, $30$ runs per condition). Filter ON conditions show near-zero exit ($0.38\%$); Filter OFF conditions show high attrition ($\approx 39\%$). Error ribbons: $95\%$ CIs.}
     \label{fig:churn}
 \end{figure}
 
-Algorithmic shielding lowers mean frustration among active users to $0.5819$ ($\text{SD} = 0.0576$, $95\%\ \text{CI} = [0.5617, 0.6024]$, Mann-Whitney $U = 871.0$, $p_{\text{adjusted}} < 3.4 \times 10^{-8}$, Cohen's $d = 3.08$). Retaining users stabilizes final step-wise revenue at \$199.24 ($\text{SD} = \$0.61$, $95\%\ \text{CI} = [\$199.03, \$199.45]$, Mann-Whitney $U = 0.0$, $p_{\text{adjusted}} < 1.7 \times 10^{-9}$, Cohen's $d = -23.97$). This approximately $64\%$ revenue increase is driven by retention of active users rather than improved feed safety. Because the initial society is pre-polarized ($\sigma(0) \approx 0.7 > 0.6$), the stylized brand-safety multiplier remains in the unsafe regime ($M_{\text{safety}} = 0.4$) for both conditions---the cliff does \emph{not} switch in the main $2\times2$. The financial benefit is therefore demographic: the filter keeps users active and preserves ad impressions even when content remains polarized.
+Mean frustration among active users falls to $0.5819$ ($\text{SD} = 0.0576$, $95\%\ \text{CI} = [0.5617, 0.6024]$, $W = 2.0$, $p_{\text{adjusted}} < 3.5 \times 10^{-7}$, $d = 3.08$). Step-wise revenue rises to \$199.24 ($\text{SD} = \$0.61$, $95\%\ \text{CI} = [\$199.03, \$199.45]$, $W = 0.0$, $p_{\text{adjusted}} < 1.1 \times 10^{-4}$, $d = -23.97$ for Group1$-$Group2). The $\approx \$78$ mean increase is demographic retention under fixed $M_{\text{unsafe}}=0.4$: because $\sigma(0)\approx 0.7 > \tau_{\text{cliff}}=0.6$, the stylized cliff does not switch in the main $2\times2$.
 
-\subsubsection{The Paradoxical Ideological Backlash}
-Beneath the financial surface, filtering confrontational interactions yields a statistically significant \textit{increase} in active-agent polarization $\sigma$. Baseline $\sigma$ settles at a mean of $0.9550$ ($\text{SD} = 0.0389$, $95\%\ \text{CI} = [0.9409, 0.9683]$), while Bridge Only raises final-step $\sigma$ to $0.9904$ ($\text{SD} = 0.0042$, $95\%\ \text{CI} = [0.9888, 0.9918]$)---a significant increase (Mann-Whitney $U = 135.0$, $p_{\text{adjusted}} < 0.0003$, Cohen's $d = -1.28$; see Figure~\ref{fig:polarization}).
+\subsubsection{Active-Agent Polarization and Full-Cohort Robustness}
+Active-agent $\sigma$ rises from $0.9550$ ($\text{SD} = 0.0389$, $95\%\ \text{CI} = [0.9409, 0.9683]$) in Baseline to $0.9904$ ($\text{SD} = 0.0042$, $95\%\ \text{CI} = [0.9888, 0.9918]$) under Filter Only ($W = 12.0$, $p_{\text{adjusted}} < 8.1 \times 10^{-6}$, $d = -1.28$; Figure~\ref{fig:polarization}). Baseline exit removes extreme agents from the active set; the filter retains them.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.58\textwidth]{figures/fig2_polarization_factorial.png}
-    \caption{Active-agent opinion polarization ($\sigma$) over time across the four experimental conditions. While the suppression filter reduces churn in the Bridge Only condition, it paradoxically locks systemic polarization at a significantly higher level ($\sigma \approx 0.9904$) compared to the Baseline ($\sigma \approx 0.9550$), demonstrating the Polarization Paradox. Error ribbons represent $95\%$ confidence intervals.}
+    \caption{Active-agent polarization ($\sigma$) over time. Filter Only locks survivor polarization higher ($\sigma \approx 0.9904$) than Baseline ($\sigma \approx 0.9550$). This is an active-set / survivorship effect, not a full-population warming (see $\sigma_{\mathrm{all}}$). Error ribbons: $95\%$ CIs.}
     \label{fig:polarization}
 \end{figure}
 
-A structural selection effect explains this phenomenon. In the unmoderated Baseline, extreme, dogmatic agents repeatedly clash with their opponents. These interactions trigger backfires, pile up frustration, and drive agents to churn. Their permanent exit mathematically clips the tails of the \emph{active} opinion distribution, capping $\sigma$.
+Full-cohort $\sigma_{\mathrm{all}}$ shows no Filter contrast: $0.9904$ vs.\ $0.9905$ ($W = 194.0$, $p_{\text{adjusted}} = 1.000$, $d = -0.004$). Retention and revenue effects remain; the claim that the filter \emph{raises} polarization applies to the active-user KPI matching the exit story.
 
-By contrast, the suppression filter isolates extreme users from frustration and keeps them active. Retained ideologues continue to pull neighbors toward the extremes, reducing the chance of consensus. By mitigating the symptoms of polarization---exit and frustration---the filter can preserve high systemic dispersion among survivors, locking the active population in ideological deadlock.
-
-\subsubsection{Full-cohort robustness ($\sigma_{\mathrm{all}}$)}
-When polarization is recomputed over the full cohort---churned agents retain their last opinion vectors---the Baseline vs.\ Bridge Only contrast disappears: $\sigma_{\mathrm{all}}$ means are $0.9904$ vs.\ $0.9905$ ($\text{SD} = 0.0069$ vs.\ $0.0041$; Mann-Whitney $U = 476.0$, $p_{\text{adjusted}} = 1.000$, Cohen's $d = -0.004$). The paradox direction therefore does \emph{not} survive this survivorship robustness check: Baseline ``depolarization'' under primary $\sigma$ is largely the exit of extreme agents from the active set, not a cooling of the full population's opinions. Retention and revenue effects remain unchanged; the interpretive claim that the filter \emph{raises} polarization should be read as applying to the active-user KPI that matches the exit story.
-
-\subsection{Trust Segregation: The Relational Cost of Social Judgments}
-Enabling dyadic trust (\textbf{Trust Only} condition) triggers a dramatic structural transformation. Trust co-evolves with dialogue as a dynamic link attribute, reshaping the network's qualitative architecture.
-
-In our Baseline, trust remains locked at a static nominal value of $0.5$ across all edges, presenting a flat relational landscape where ingroup and outgroup trust are identical (yielding a segregation ratio of exactly $1.00$).
-
-Under the Trust Only condition, co-evolving opinions and trust split the network into relational camps (see Figure~\ref{fig:trust_seg}). Ingroup trust---the trust linking agents sharing the same opinion pole---climbs to a near-perfect mean of $0.9814$ ($\text{SD} = 0.0055$, $95\%\ \text{CI} = [0.9794, 0.9832]$). Conversely, outgroup trust completely collapses, bottoming out at a mean of $0.0415$ ($\text{SD} = 0.0256$, $95\%\ \text{CI} = [0.0331, 0.0511]$).
-
-This relational divergence raises the Trust Segregation Ratio to a mean of $35.61$ ($\text{SD} = 31.50$, $95\%\ \text{CI} = [26.29, 47.64]$). Because the ratio is heavy-tailed (maximum $\approx 175$ across runs), we also report the median and interquartile range: median $= 28.58$, $\text{IQR} = [19.06, 40.61]$. Compared to the Baseline, the effect is large: Mann-Whitney $U = 0.0$, $p_{\text{adjusted}} < 8.0 \times 10^{-11}$, Cohen's $d = -1.55$. These figures describe the Trust Only vs.\ Baseline contrast (enabling trust co-evolution), not a filter effect.
-
-This segregation exposes the double-edged role of trust. Inside ideological camps, high ingroup trust increases the influence weight $w_{ij}$, buffering minor disagreements via a ``friends can argue'' mechanism. Across camps, the asymmetry of trust co-evolution ($\delta_- / \delta_+ = 2.5$) erodes cross-cutting ties faster than agreement can rebuild them. Combined with passive decay ($\lambda = 0.001$), outgroup trust collapses and the network segregates into two cohesive but mutually hostile relational silos.
+\subsection{Trust Segregation}
+Under \textbf{Trust Only}, ingroup trust rises to $0.9808$ ($\text{SD} = 0.0056$, $95\%\ \text{CI} = [0.9788, 0.9827]$) and outgroup trust falls to $0.0432$ ($\text{SD} = 0.0256$, $95\%\ \text{CI} = [0.0348, 0.0528]$; Figure~\ref{fig:trust_seg}). Trust Segregation averages $31.28$ ($\text{SD} = 18.83$, $95\%\ \text{CI} = [24.97, 38.21]$; median $= 26.76$, $\text{IQR} = [17.09, 40.66]$). Versus Baseline: $W = 0.0$, $p_{\text{adjusted}} < 1.2 \times 10^{-7}$, $d = -2.27$. These contrasts enable trust co-evolution; they are not Filter effects.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.65\textwidth]{figures/fig6_trust_dynamics.png}
-    \caption{Interpersonal dyadic trust co-evolution dynamics. Panel A compares mean trust over time in the Trust Only and Full Model. Panel B illustrates the extreme divergence between ingroup trust (climbing toward $0.98$) and outgroup trust (collapsing to near $0.03$), demonstrating the emergence of severe trust segregation. Error ribbons denote $95\%$ confidence intervals.}
+    \caption{Dyadic trust dynamics. Panel A: mean trust under Trust Only and Full Model. Panel B: ingroup trust (near $0.98$) vs.\ outgroup trust (near $0.04$). Error ribbons: $95\%$ CIs.}
     \label{fig:trust_seg}
 \end{figure}
 
-\subsection{Moderation Analysis: The Bridge \texorpdfstring{$\times$}{x} Trust Interaction}
-To test whether co-evolving dyadic trust moderates the impact of the suppression filter, we perform a seed-paired interaction analysis. Because runs share random seeds, we compute paired differences in final metrics:
+\subsection{Moderation Analysis: Filter \texorpdfstring{$\times$}{x} Trust}
+Seed-paired contrasts:
 \begin{align}
-    \Delta_{\text{alone}} &= \text{Metric}(\text{Bridge Only}) - \text{Metric}(\text{Baseline}) \\
+    \Delta_{\text{alone}} &= \text{Metric}(\text{Filter Only}) - \text{Metric}(\text{Baseline}) \\
     \Delta_{\text{with trust}} &= \text{Metric}(\text{Full Model}) - \text{Metric}(\text{Trust Only})
 \end{align}
-We then apply a Wilcoxon signed-rank test to the per-seed contrast $\Delta_{\text{with trust}} - \Delta_{\text{alone}}$, which matches the paired design (see Table~\ref{tab:interaction}).
+Wilcoxon tests on $\Delta_{\text{with trust}}-\Delta_{\text{alone}}$ use a separate Bonferroni family ($m=11$; Table~\ref{tab:interaction}).
 
 \begin{table}[htbp]
 \centering
 \footnotesize
-\caption{Bridge $\times$ Trust Interaction Analysis (Seed-Paired Differences)}
+\caption{Filter $\times$ Trust interaction (seed-paired). Trust-KPI rows with $\Delta_{\mathrm{alone}}=0$ by design are flagged and should not be read as retention-style moderation.}
 \label{tab:interaction}
 \begin{tabular}{lccccc}
 \toprule
  & \textbf{Effect Alone} & \textbf{Effect w/Trust} & \textbf{Interaction} & & \\
-\textbf{Metric} & \textbf{($\Delta_{\text{alone}}$)} & \textbf{($\Delta_{\text{with trust}}$)} & \textbf{Cohen's $d$} & \textbf{$W$-statistic} & \textbf{Adj. $p$-value} \\
+\textbf{Metric} & \textbf{($\Delta_{\text{alone}}$)} & \textbf{($\Delta_{\text{with trust}}$)} & \textbf{Cohen's $d$} & \textbf{$W$} & \textbf{Adj.\ $p$} \\
 \midrule
-Active Users & $+194.0$ & $+190.1$ & $-0.3508$ & $112.5$ & $0.1480$ \\
-Avg. Frustration & $-0.3849$ & $-0.3981$ & $-0.0739$ & $198.0$ & $1.0000$ \\
-Churn Rate & $-38.80\%$ & $-38.02\%$ & $+0.3508$ & $116.5$ & $0.1868$ \\
-Ingroup Trust & $0.0000$ & $-0.0114$ & $-2.6925$ & $4.0$ & $< 1.5 \times 10^{-7}$ \\
-Mean Trust & $0.0000$ & $+0.0300$ & $+4.8926$ & $0.0$ & $< 2.1 \times 10^{-8}$ \\
-Outgroup Trust & $0.0000$ & $-0.0127$ & $-0.8219$ & $97.0$ & $0.0477$ \\
-Polarization ($\sigma$) & $+0.0353$ & $+0.0322$ & $-0.0887$ & $187.0$ & $1.0000$ \\
-Polarization ($\sigma_{\mathrm{all}}$) & $+0.0000$ & $-0.0014$ & $-0.2019$ & $220.0$ & $1.0000$ \\
-Revenue & $+\$77.60$ & $+\$76.04$ & $-0.3508$ & $106.5$ & $0.1050$ \\
-Trust Segregation & $0.0000$ & $+1.9854$ & $+0.0902$ & $135.0$ & $0.4940$ \\
+Active Users & $+194.0$ & $+190.3$ & $-0.3347$ & $117.5$ & $0.1964$ \\
+Avg.\ Frustration & $-0.3849$ & $-0.3915$ & $-0.0368$ & $216.0$ & $1.0000$ \\
+Churn Rate & $-38.80\%$ & $-38.05\%$ & $+0.3347$ & $121.0$ & $0.2393$ \\
+Ingroup Trust$^{\dagger}$ & $0.0000$ & $-0.0110$ & $-3.2083$ & $1.0$ & $< 4.1 \times 10^{-8}$ \\
+Mean Trust$^{\dagger}$ & $0.0000$ & $+0.0300$ & $+4.9482$ & $0.0$ & $< 2.1 \times 10^{-8}$ \\
+Outgroup Trust$^{\dagger}$ & $0.0000$ & $-0.0139$ & $-0.9249$ & $84.0$ & $0.0174$ \\
+Polarization ($\sigma$) & $+0.0353$ & $+0.0336$ & $-0.0469$ & $208.0$ & $1.0000$ \\
+Polarization ($\sigma_{\mathrm{all}}$) & $+0.0000$ & $-0.0002$ & $-0.0382$ & $221.0$ & $1.0000$ \\
+Revenue & $+\$77.60$ & $+\$76.11$ & $-0.3347$ & $111.0$ & $0.1369$ \\
+Trust Segregation$^{\dagger}$ & $0.0000$ & $+5.3710$ & $+0.4417$ & $135.0$ & $0.4940$ \\
 \bottomrule
+\multicolumn{6}{l}{\footnotesize $^{\dagger}$ Trust KPI with $\Delta_{\mathrm{alone}}=0$ when Trust OFF (design artifact).} \\
 \end{tabular}%
 \end{table}
 
-\subsubsection{Active Users, Frustration, and Churn:}
-Interaction effects on physical user retention (Active Users, Churn Rate, and Avg.\ Frustration) and financial performance (Revenue) remain non-significant after Bonferroni correction in the seed-paired analysis. The filter's retention benefits are similar with or without trust co-evolution: it rescues approximately $190$ to $194$ users from churning, reduces frustration by $\approx 0.39$, and preserves $\approx \$76$ in step-wise revenue.
+Retention interactions (Active Users, Churn, Frustration, Revenue) remain non-significant after Bonferroni. Filter retention benefits are similar with or without trust ($\approx 190$--$194$ users rescued). Trust-KPI ``interactions'' with $\Delta_{\mathrm{alone}}=0$ are not comparable to those retention tests.
 
-\subsubsection{Outgroup Trust and Trust Segregation:}
-Relational metrics show a nuanced pattern. Seed-paired Wilcoxon tests find a significant Bridge $\times$ Trust interaction for \textbf{Outgroup Trust} ($W = 97.0$, $p_{\text{adjusted}} = 0.0477$, interaction $d = -0.82$): when trust co-evolves, the filter effect on outgroup trust is a small mean reduction of $-0.0127$ (Full Model $0.0288$ vs.\ Trust Only $0.0415$). By contrast, the Trust Segregation interaction is \textbf{not significant} after Bonferroni correction ($W = 135.0$, $p_{\text{adjusted}} = 0.4940$, $d \approx 0.09$). Pairwise Full Model vs.\ Trust Only contrasts for both Outgroup Trust and Trust Segregation are also non-significant after Bonferroni correction ($p_{\text{adjusted}} = 1.000$).
-
-We therefore treat the filter's relational side-effects as modest and method-dependent: retention benefits are robust, while claims of intensified segregation under the Full Model are not supported by the paired Wilcoxon interaction test or by pairwise condition contrasts. Mechanistically, the filter can replace rejection-zone events with Zone~2 silence (no trust rebuild) and retain agents who would otherwise churn, leaving ties exposed to passive decay ($\lambda = 0.001$); these mechanisms can shift descriptive means without producing a large, reliably detected segregation interaction.
-
-\subsection{Echo Chambers: Emergent Structural Clustering}
-To analyze how these cognitive and relational forces reshape the topological communication patterns of the platform, we track the \textbf{Opinion-Weighted Clustering Coefficient} (see Figure~\ref{fig:clustering}). This metric measures the local density of \emph{active--active--active} triads where all three connected agents share the same opinion pole---serving as a direct indicator of structural echo chambers among remaining users.
+\subsection{Echo Chambers}
+Opinion-weighted clustering uses active--active--active triples (Figure~\ref{fig:clustering}). Baseline mean $0.1316$ ($\text{SD} = 0.0255$, $95\%\ \text{CI} = [0.1228, 0.1407]$); Trust Only $0.1316$ ($p_{\text{adjusted}} = 1$). Filter Only lowers clustering to $0.0830$ ($\text{SD} = 0.0152$, $95\%\ \text{CI} = [0.0776, 0.0884]$, $W = 0.0$, $p_{\text{adjusted}} < 1.2 \times 10^{-7}$, $d = 2.32$). Full Model: $0.0870$ ($\text{SD} = 0.0136$, $95\%\ \text{CI} = [0.0821, 0.0919]$, $W = 0.0$, $p_{\text{adjusted}} < 1.2 \times 10^{-7}$, $d = 2.19$).
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.58\textwidth]{figures/fig7_echo_chambers.png}
-    \caption{Emergent structural echo chambers, measured via the opinion-weighted clustering coefficient over time (active triples only). The suppression filter (Bridge Only and Full Model) significantly reduces local triadic homogeneity compared to the Baseline, although global active-agent polarization remains extreme. Error ribbons show $95\%$ confidence intervals.}
+    \caption{Opinion-weighted clustering (active triples). Filter ON conditions reduce local same-pole triangles relative to Baseline while active-agent polarization remains high. Error ribbons: $95\%$ CIs.}
     \label{fig:clustering}
 \end{figure}
 
-In our Baseline, the final mean opinion-weighted clustering coefficient settles at $0.1316$ ($\text{SD} = 0.0255$, $95\%\ \text{CI} = [0.1228, 0.1407]$). When we activate trust co-evolution alone (\textbf{Trust Only}), clustering remains statistically unchanged at a mean of $0.1317$ ($\text{SD} = 0.0271$, $95\%\ \text{CI} = [0.1224, 0.1413]$, Mann-Whitney $U = 448.0$, $p_{\text{adjusted}} = 1.0000$, Cohen's $d = -0.003$). This static result shows that trust co-evolution alone, despite locking relationships into hostile camps, does not alter the physical clustering of opinions beyond the baseline scale-free structure.
-
-Deploying the suppression filter reduces structural clustering. Under the \textbf{Bridge Only} condition, opinion-weighted clustering drops to a mean of $0.0830$ ($\text{SD} = 0.0152$, $95\%\ \text{CI} = [0.0776, 0.0884]$)---a significant decline relative to the Baseline (Mann-Whitney $U = 869.0$, $p_{\text{adjusted}} < 4.1 \times 10^{-8}$, Cohen's $d = 2.32$).
-
-Similarly, under the \textbf{Full Model} (Bridge ON, Trust ON), opinion-weighted clustering settles at a mean of $0.0866$ ($\text{SD} = 0.0137$, $95\%\ \text{CI} = [0.0817, 0.0914]$), also significantly below Baseline (Mann-Whitney $U = 869.0$, $p_{\text{adjusted}} < 4.1 \times 10^{-8}$, Cohen's $d = 2.20$).
-
-This shift occurs because the filter intercepts many extreme backfires and dampens local repulsion. Active-agent polarization can remain high because dogmatic users who would otherwise exit are retained, while local triangles become slightly less homogeneous.
-
-Lower clustering should not be read as systemic resolution. Agents may remain connected in triangles while interpersonal trust stays partitioned and many cross-cutting channels are inactive.
-
 \subsection{Mechanism Checks}
-To isolate what produces the paradox, we ran paired ablations ($20$ seeds; Figure~\ref{fig:ablations}; lower power than the main factorial). Relative to an unmoderated reference (mean churn $38.66\%$, polarization $0.9579$), standard intercept filtering with healing (M0) cuts churn to $0.39\%$ while raising active-agent polarization to $0.9901$. A placebo that heals frustration without intercepting opinion change (M1) lowers churn only to $5.82\%$ and leaves polarization high ($0.9924$): retention help without opinion intercept is weaker than full intercept. Removing the frustration-healing bonus while keeping intercept (M3) raises churn to $20.53\%$, so healing contributes substantially to retention. Dropping rejection events without healing (M2) yields the same aggregate KPIs as M3 under these defaults ($20.53\%$ churn; polarization $0.9839$) and is clearly distinct from intercept+heal (M0): skipping the interaction alone does not reproduce M0's near-zero churn. Disabling passive trust decay in the Full Model (M4) still yields near-zero churn and high polarization. Setting the brand-safety multiplier to $1.0$ (M5) leaves polarization and churn unchanged but raises revenue to the full active-user scale, confirming that the cliff mainly scales revenue rather than the opinion paradox.
+Descriptive ablations ($20$ seeds; Figure~\ref{fig:ablations}; lower power than the main factorial). Relative to REF (churn $38.66\%$, $\sigma=0.9579$), intercept+heal (M0) yields churn $0.39\%$ and $\sigma=0.9901$. Heal-only (M1) yields churn $5.82\%$. Drop without heal (M2) and intercept with $B_{hb}=0$ (M3) both yield churn $20.53\%$ and $\sigma=0.9839$---distinct from M0. Full Model without trust decay (M4) keeps near-zero churn. Setting the revenue multiplier to $1.0$ (M5) leaves polarization/churn unchanged but scales revenue to the full active-user level.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.95\textwidth]{figures/fig_ablations.png}
-    \caption{Mechanism ablations ($20$ seeds): mean Polarization, Churn Rate, and Revenue by condition. Error bars show standard deviations.}
+    \caption{Mechanism ablations ($20$ seeds): mean Polarization, Churn Rate, and Revenue. Error bars: SDs. Descriptive only.}
     \label{fig:ablations}
 \end{figure}
 
 \subsection{Baseline Model Comparison}
-On the same BA networks and seeds, simple Hegselmann--Krause bounded confidence yields lower final polarization (mean $0.6991$) and no churn pathway. A lightweight biased-assimilation update without Social Judgment zones or exit also stays near-extreme (mean polarization $0.9900$) with zero churn. Dynamic-BABE Baseline is distinctive in jointly producing high polarization \emph{and} substantial exit (churn $38.66\%$). The suppression filter therefore acts on a model that already links conflict to leaving---a coupling the simpler baselines omit (Figure~\ref{fig:baselines}).
+On the same BA networks and seeds, HK bounded confidence yields lower final polarization (mean $0.6991$) and no churn pathway. A lightweight biased-assimilation update without SJT zones or exit stays near-extreme (mean $0.9900$) with zero churn. Dynamic-BABE Baseline jointly produces high polarization and substantial exit (Figure~\ref{fig:baselines}).
 
 \begin{figure}[htbp]
     \centering
@@ -137,11 +109,11 @@ On the same BA networks and seeds, simple Hegselmann--Krause bounded confidence 
 \end{figure}
 
 \subsection{Topology Robustness}
-Repeating Filter OFF/ON on Watts--Strogatz graphs ($k=6$, $p=0.1$; $15$ seeds) preserves the qualitative paradox for active-agent $\sigma$: the filter cuts churn from $36.04\%$ to $0.17\%$ while polarization rises from $0.9730$ to $0.9896$, comparable in direction to Barab\'{a}si--Albert under the same seeds (Figure~\ref{fig:topology}).
+Filter OFF/ON on Watts--Strogatz ($k=6$, $p=0.1$; $15$ seeds; descriptive) preserves the qualitative direction: filter cuts churn while active-agent polarization rises, comparable to Barab\'{a}si--Albert under the same seeds (Figure~\ref{fig:topology}).
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/fig_topology_robustness.png}
-    \caption{Filter OFF/ON contrasts on Barab\'{a}si--Albert vs.\ Watts--Strogatz topologies ($15$ seeds).}
+    \caption{Filter OFF/ON contrasts on Barab\'{a}si--Albert vs.\ Watts--Strogatz ($15$ seeds). Descriptive.}
     \label{fig:topology}
 \end{figure}

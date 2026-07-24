@@ -1,29 +1,29 @@
-We map the processes above with a $2 \times 2$ design crossing the suppression filter and dyadic trust (factorial labels retain Bridge ON/OFF):
+We map the processes above with a $2 \times 2$ design crossing the Suppression Filter and dyadic trust:
 \begin{enumerate*}
-    \item \textbf{Baseline (Bridge OFF, Trust OFF):} Biased assimilation under static neutral trust ($T_{ij} = 0.5$).
-    \item \textbf{Bridge Only (Bridge ON, Trust OFF):} Suppression filter on; trust fixed.
-    \item \textbf{Trust Only (Bridge OFF, Trust ON):} Trust co-evolves; no filter.
-    \item \textbf{Full Model (Bridge ON, Trust ON):} Both mechanisms active.
+    \item \textbf{Baseline (Filter OFF, Trust OFF):} Biased assimilation with \emph{no} trust term in $w_{ij}$ (code omits $\gamma_T T_{ij}$; edges are not initialized with trust).
+    \item \textbf{Filter Only (Filter ON, Trust OFF):} Suppression Filter on; same trust-off weight rule.
+    \item \textbf{Trust Only (Filter OFF, Trust ON):} Trust co-evolves from $T_0=0.5$; filter off.
+    \item \textbf{Full Model (Filter ON, Trust ON):} Both mechanisms active.
 \end{enumerate*}
 
 \subsubsection{Model Hyperparameters and Topology}
 The model places $N = 500$ agents on a Barab{\'a}si--Albert network~\citep{Barabasi1999} with $m = 3$. Opinions live in $K = 2$ issues with bipolar initialization: pole $\pi_i \in \{-1,+1\}$ with equal probability, and each issue set to $\pi_i \cdot U(0.4,1.0)$ (clipped to $[-1,1]$).
 
-Entrenchment $\beta_i \sim \mathcal{N}(4.0, 1.5)$ with floor $0.5$. When trust is on, influence shifts by $\gamma_T=0.3$, gains $\delta_+=0.02$ on assimilation, loses $\delta_-=0.05$ on backfire, and decays at $\lambda=0.001$ per step. The suppression filter intercepts rejection-zone events with efficacy $E=0.46$ and applies a two-point frustration relief.
+Entrenchment $\beta_i \sim \mathcal{N}(4.0, 1.5)$ with floor $0.5$. When trust is on, influence shifts by $\gamma_T=0.3$, gains $\delta_+=0.02$ on assimilation, loses $\delta_-=0.05$ on backfire, and decays at $\lambda=0.001$ per step. The Suppression Filter intercepts rejection-zone events with efficacy $E=0.46$ and applies a two-point frustration relief. Defaults for $E$, $T_c$, and $B_{hb}$ are theoretical knobs (not fitted); OFAT sweeps show the qualitative filter--churn contrast is robust at interior values and breaks mainly at identifiable boundaries ($E=0$, near-perfect $E=1$, very low $\beta$).
 
-We run $R=30$ replications per condition for $S=200$ steps. Run $i$ uses seed $42+i$.
+We run $R=30$ replications per condition for $S=200$ steps. Run $i$ uses seed $42+i$. Initializing $\sigma(0)\approx 0.7$ above the stylized cliff $\tau_{\text{cliff}}=0.6$ is intentional: the design evaluates demographic retention on an already pre-polarized platform, so $M_{\text{safety}}$ stays at the unsafe scale in the main $2\times2$ and revenue tracks active users.
 
 \subsubsection{Stylized Facts and Qualitative Targets}
 Parameters are literature-motivated, not fitted to a proprietary platform log. We instead check that default Dynamic-BABE recovers directional patterns reported in related work:
 \begin{description*}
-    \item[Backfire under opposing exposure.] Rejection-zone contact moves opinions apart in the model~\citep{Bail2018, Sherif1961}; field backfire evidence is contested (see Related Work).
-    \item[Feed regime vs.\ deep attitudes.] The filter changes exit/retention strongly while polarization stays high or rises, consistent in spirit with feed experiments where ranking shifts behavior more than core attitudes~\citep{Guess2023}.
+    \item[Rejection-zone repulsion.] Zone~3 contact moves opinions apart in the model~\citep{Sherif1961, Jager2005}; field backfire evidence is contested (see Related Work).
+    \item[Feed regime vs.\ deep attitudes.] The filter changes exit/retention strongly while active-agent polarization stays high or rises, consistent in spirit with feed experiments where ranking shifts behavior more than core attitudes~\citep{Guess2023}.
     \item[Fragile trust.] Gain/loss asymmetry ($\delta_-/\delta_+ = 2.5$) follows~\citet{Slovic1993} and yields trust segregation when trust is enabled.
     \item[Exit under conflict.] Frustration-driven churn implements Hirschmanian exit~\citep{Hirschman1970} under unmoderated conflict.
 \end{description*}
 These are qualitative anchors, not quantitative calibration targets.
 
 \subsubsection{Statistical Methodology}
-Final-step metrics across $120$ runs use non-parametric tests because several KPIs are skewed or bounded. Pairwise contrasts use two-sided Mann--Whitney $U$~\citep{Mann1947} with Bonferroni correction over the family of pairwise metric tests (approximately $60$ comparisons: $6$ condition pairs $\times$ $\sim 10$ metrics) and Cohen's $d$~\citep{Cohen1988} as a parametric complement to the rank tests. Very large $|d|$ values often reflect nearly separated distributions rather than a continuous effect-size scale. We also report $95\%$ bootstrap intervals ($10{,}000$ resamples). Trust Segregation is capped at $10^{6}$ in the analysis path when outgroup trust is numerically zero.
+Final-step metrics across $120$ runs use non-parametric tests because several KPIs are skewed or bounded. Because run $i$ shares seed $42+i$ across cells, \textbf{primary pairwise inference is seed-paired Wilcoxon signed-rank} on per-seed differences, with Bonferroni correction over the family of non-degenerate pairwise tests (identically flat contrasts, e.g.\ trust KPIs when Trust OFF in both cells, are excluded from $m$). Mann--Whitney $U$ is retained only as a supplementary unpaired sensitivity. Cohen's $d$ uses the convention $(\bar x_{\mathrm{Group1}}-\bar x_{\mathrm{Group2}})/\mathrm{SD}_{\mathrm{pooled}}$ and is a parametric complement; for near-separated churn/revenue distributions we emphasize mean differences and CIs, treating very large $|d|$ as a separation signal rather than a continuum effect size. We also report $95\%$ bootstrap intervals ($10{,}000$ resamples). Trust Segregation is capped at $10^{6}$ when outgroup trust is numerically zero.
 
-For Bridge $\times$ Trust moderation we form seed-paired effects $\Delta_{\mathrm{alone}}=(\mathrm{Bridge\ Only})-(\mathrm{Baseline})$ and $\Delta_{\mathrm{with\ trust}}=(\mathrm{Full\ Model})-(\mathrm{Trust\ Only})$, then apply a Wilcoxon signed-rank test to their difference, with Bonferroni correction across metrics.
+For Filter $\times$ Trust moderation we form seed-paired effects $\Delta_{\mathrm{alone}}=(\mathrm{Filter\ Only})-(\mathrm{Baseline})$ and $\Delta_{\mathrm{with\ trust}}=(\mathrm{Full\ Model})-(\mathrm{Trust\ Only})$, then apply Wilcoxon signed-rank to their difference, with a \emph{separate} Bonferroni family across interaction metrics. When Trust OFF, trust KPIs have $\Delta_{\mathrm{alone}}\equiv 0$ by design; those ``interactions'' are not comparable to retention moderation and are flagged accordingly.

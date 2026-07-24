@@ -8,10 +8,10 @@ Run:
     python visualize.py
 
 Conditions (2×2 factorial):
-    Baseline     — Bridge OFF, Trust OFF
-    Bridge Only  — Bridge ON,  Trust OFF
-    Trust Only   — Bridge OFF, Trust ON
-    Full Model   — Bridge ON,  Trust ON
+    Baseline     — Filter OFF, Trust OFF
+    Filter Only  — Filter ON,  Trust OFF   (CSV: "Bridge Only")
+    Trust Only   — Filter OFF, Trust ON
+    Full Model   — Filter ON,  Trust ON
 
 Figures produced (main text):
     fig2_polarization_factorial.png  — Polarization over time, 4 conditions
@@ -44,23 +44,44 @@ FIG_W = 8.0   # 8 in × 100 dpi = 800 px
 FIG_H = 4.0
 SAVE_KW = dict(dpi=FIG_DPI, bbox_inches="tight", pad_inches=0.15)
 
+# Display names for legends / titles (Suppression Filter terminology)
 CONDITIONS = OrderedDict([
     ("Baseline",     {"color": "#E74C3C", "ls": "-"}),      # Red
-    ("Bridge Only",  {"color": "#2980B9", "ls": "-"}),      # Blue
+    ("Filter Only",  {"color": "#2980B9", "ls": "-"}),      # Blue
     ("Trust Only",   {"color": "#27AE60", "ls": "--"}),     # Green dashed
     ("Full Model",   {"color": "#8E44AD", "ls": "--"}),     # Purple dashed
 ])
 
-# Map condition names to CSV filename suffixes
+# CSV filename suffixes keyed by display name (files still use bridge_only)
 _CSV_MAP = OrderedDict([
     ("Baseline",    "baseline"),
-    ("Bridge Only", "bridge_only"),
+    ("Filter Only", "bridge_only"),
     ("Trust Only",  "trust_only"),
     ("Full Model",  "full_model"),
 ])
 
+# Map Condition column values from batch_run CSVs → display names
+_CONDITION_DISPLAY = {
+    "Baseline": "Baseline",
+    "Bridge Only": "Filter Only",
+    "Filter Only": "Filter Only",
+    "Trust Only": "Trust Only",
+    "Full Model": "Full Model",
+}
+
 OUT_DIR = os.path.join(os.path.dirname(__file__), "figures")
 DATA_DIR = os.path.join(os.path.dirname(__file__), "output")
+
+
+def _apply_condition_display(df):
+    """Map CSV Condition labels (e.g. Bridge Only) to Filter display names."""
+    if df is None or "Condition" not in df.columns:
+        return df
+    out = df.copy()
+    out["Condition"] = out["Condition"].map(
+        lambda c: _CONDITION_DISPLAY.get(c, c)
+    )
+    return out
 
 
 def load_data():
@@ -77,7 +98,7 @@ def load_data():
         frames.append(tmp)
     if not frames:
         raise FileNotFoundError("No model-level CSVs found in {}".format(DATA_DIR))
-    return pd.concat(frames, ignore_index=True)
+    return _apply_condition_display(pd.concat(frames, ignore_index=True))
 
 
 def load_agent_data():
@@ -94,7 +115,7 @@ def load_agent_data():
         frames.append(tmp)
     if not frames:
         return None
-    return pd.concat(frames, ignore_index=True)
+    return _apply_condition_display(pd.concat(frames, ignore_index=True))
 
 
 def plot_metric(df, metric, ylabel, title, filename,

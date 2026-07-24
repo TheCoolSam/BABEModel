@@ -31,7 +31,7 @@ POLARIZATION_CLIFF = 0.6
 SAFE_AD_MULTIPLIER = 1.0
 UNSAFE_AD_MULTIPLIER = 0.4
 
-# The Bridge Algorithm
+# Suppression filter (code flag enable_bridge; not constructive bridging ranking)
 ENABLE_BRIDGE = False
 BRIDGE_EFFICACY = 0.46
 # Ablation / experiment hooks (defaults preserve published 2x2 behaviour)

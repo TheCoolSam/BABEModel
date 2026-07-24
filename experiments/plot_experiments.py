@@ -61,17 +61,28 @@ def plot_baselines(path: str):
 
 def plot_topology(path: str):
     df = pd.read_csv(path)
+    # Display-only rename: CSV column stays "Bridge"
+    if "Bridge" in df.columns:
+        df = df.copy()
+        df["Filter"] = df["Bridge"].map({True: "Filter ON", False: "Filter OFF"})
+        hue_col = "Filter"
+    else:
+        hue_col = "Bridge"
     fig, axes = plt.subplots(1, 2, figsize=(8, 3.5))
     for ax, kpi in zip(axes, ["Polarization", "Churn_Rate"]):
         sns.barplot(
             data=df,
             x="Topology",
             y=kpi,
-            hue="Bridge",
+            hue=hue_col,
             ax=ax,
             errorbar="sd",
         )
         ax.set_title(kpi.replace("_", " "))
+        # Ensure legend uses Filter wording
+        leg = ax.get_legend()
+        if leg is not None:
+            leg.set_title("Filter")
     fig.suptitle("Topology robustness (BA vs Watts–Strogatz)", fontweight="bold")
     plt.tight_layout()
     _save(fig, "fig_topology_robustness.png")

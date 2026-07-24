@@ -1,30 +1,30 @@
 % paper/sections/07_discussion.tex
 
-We interpret the Polarization Paradox with Exit--Voice--Loyalty, discuss trust, state conditional implications, summarise robustness (including mechanism and topology checks), and list limitations.
+We interpret the Polarization Paradox with Exit--Voice--Loyalty, discuss trust, state conditional implications, summarise robustness, and list limitations.
 
 \subsection{The Polarization Paradox: Exit, Voice, and Loyalty}
-\citet{Hirschman1970} distinguishes \textbf{Exit} (leave) from \textbf{Voice} (stay and try to repair). In the Baseline, rejection-zone contact raises frustration and many agents exit. Exit is costly for the platform, but it also removes some extreme agents from the active population.
+\citet{Hirschman1970} distinguishes \textbf{Exit} from \textbf{Voice}. In the Baseline, rejection-zone contact raises frustration and many agents exit---costly for the platform, but also removing some extreme agents from the active set.
 
-The suppression filter intercepts many backfires and reduces exit. Retention and step-wise revenue improve; because $\sigma(0)$ already exceeds the stylized brand-safety cliff, that revenue gain is demographic rather than a cliff switch. The same intervention often replaces rejection with Zone~2 silence rather than constructive engagement, so it does not build Voice. Closing exit without opening repair can leave extreme agents active, sustaining high \emph{active-agent} polarization while churn falls. Full-cohort $\sigma_{\mathrm{all}}$ does not rise under the filter, so the paradox is best read as a retention-vs-survivor-dispersion trade-off rather than a literal warming of the entire population's opinions.
+The Suppression Filter intercepts many Zone~3 events and reduces exit. Retention and retention-scaled revenue improve; because $\sigma(0)$ already exceeds the stylized cliff, that revenue gain is demographic. The filter often replaces rejection with Zone~2 silence rather than constructive engagement, so it does not build Voice. Closing exit without opening repair leaves extreme agents active, sustaining high \emph{active-agent} polarization while churn falls. Full-cohort $\sigma_{\mathrm{all}}$ does not rise, so the paradox is retention versus survivor dispersion---not population warming.
 
 \subsection{Dyadic Trust}
-Trust is double-edged. Agreement raises ingroup trust (mean $0.9814$ in Trust Only); conflict and asymmetry ($\delta_-/\delta_+ = 2.5$) following~\citet{Slovic1993} collapse outgroup trust (mean $0.0415$). With passive decay, trust segregates (mean ratio $35.61$; median $28.58$). These patterns come mainly from enabling trust co-evolution, not from the filter contrast that defines the paradox. Trust shifts the influence weight $w_{ij}$ (source-credibility weighting) before SJT zone classification; it is not itself an SJT latitude.
+Trust is double-edged. Agreement raises ingroup trust (mean $0.9808$ in Trust Only); conflict and asymmetry ($\delta_-/\delta_+ = 2.5$) following~\citet{Slovic1993} collapse outgroup trust (mean $0.0432$). With passive decay, trust segregates (mean ratio $31.28$; median $26.76$). These patterns come from enabling trust co-evolution, not from the Filter contrast. Trust shifts $w_{ij}$ before SJT zone classification (source-credibility weighting). Assimilation and repulsion step sizes are clamped to $[0,1]$ so high trust cannot produce DeGroot overshoot.
 
 \subsection{Conditional Implications}
-Curation systems often optimise engagement, retention, and brand safety. Our results suggest those objectives need not track cohesion. If designers also care about cross-camp relational capital, suppression alone is an incomplete instrument. That statement is a conditional implication from a theoretical laboratory, not a prescription for any named platform.
+Curation systems often optimise engagement and retention. Our results suggest those objectives need not track cohesion among remaining users. If designers also care about cross-camp relational capital, suppression alone is an incomplete instrument. That statement is a conditional implication from a theoretical laboratory, not a prescription for any named platform.
 
 \subsection{Robustness}
-OFAT sweeps over $\beta_{\mathrm{mean}}$, $\tau_{\mathrm{assim}}$, $T_c$, $K$, $\gamma_T$, $E$, and $m_e$ (five replications per cell; $N=500$) preserve the qualitative paradox at interior points: the filter cuts churn and typically raises final polarization. Exceptions are identifiable boundaries (very low $\beta$; $E=0$; near-perfect $E=1$). See \texttt{sensitivity.py} and \texttt{output/sensitivity\_results.csv}.
+OFAT sweeps over $\beta_{\mathrm{mean}}$, $\tau_{\mathrm{assim}}$, $T_c$, $K$, $\gamma_T$, $E$, and $m_e$ (five replications per cell; $N=500$) preserve the qualitative filter--churn contrast at interior points; exceptions are identifiable boundaries (very low $\beta$; $E=0$; near-perfect $E=1$). See \texttt{sensitivity.py} and \texttt{output/sensitivity\_results.csv}.
 
-Additional checks (see Results) are lower-power supplements relative to the main $30$-seed factorial: (i) placebo retention without opinion intercept does not reproduce the paradox in the same way as intercept filtering, (ii) dropping rejection events without healing is distinct from intercept+heal, (iii) Dynamic-BABE differs from simple HK / biased-DeGroot baselines in linking suppression to exit, and (iv) the Filter OFF/ON contrast remains directionally similar on Watts--Strogatz as on Barab\'{a}si--Albert graphs under our defaults.
+Additional checks (Results) are lower-power supplements: (i) placebo heal without intercept is weaker than intercept+heal; (ii) drop without heal matches no-heal intercept and is distinct from M0; (iii) Dynamic-BABE differs from HK / biased-DeGroot baselines in linking suppression to exit; (iv) Filter OFF/ON remains directionally similar on Watts--Strogatz under our defaults.
 
 \subsection{Limitations and Future Work}
 \begin{enumerate*}
-    \item \textbf{Symmetric trust:} We assume $T_{ij}=T_{ji}$.
-    \item \textbf{Static undirected topology:} BA/WS graphs are undirected and fixed; real follower graphs are directed and rewiring.
+    \item \textbf{Symmetric trust:} $T_{ij}=T_{ji}$.
+    \item \textbf{Static undirected topology:} BA/WS graphs are fixed; real follower graphs are directed and rewiring.
     \item \textbf{Low-dimensional issues:} $K=2$.
     \item \textbf{Pole edge case:} $\mathrm{sign}(\overline{O}_i)=0$ is a distinct pole (rare under bipolar init).
     \item \textbf{No field fit:} Parameters are not estimated from a named platform dataset.
-    \item \textbf{Stylized filter and revenue:} Abstractions for theory, not audited production systems; revenue $\approx$ retention under a pre-polarized cliff.
+    \item \textbf{Stylized filter and revenue:} Revenue $\approx$ retention under a pre-polarized cliff; not an audited production system.
 \end{enumerate*}
 Despite these limits, the model is a transparent testbed for how suppression and fragile trust jointly shape polarization and retention.

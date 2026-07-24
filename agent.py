@@ -126,12 +126,10 @@ class SocialAgent(Agent):
         Modified DeGroot (1974) consensus update - CONSTRUCTIVE path,
         with confirmation-bias dampening.
 
-        Step size is attenuated by cognitive entrenchment: high beta resists change.
-
-        This preserves DeGroot's direction (pull toward the other)
-        but entrenched agents move much less per interaction.
+        Step size is attenuated by cognitive entrenchment, then clamped
+        to [0, 1] so the update remains a convex combination (no overshoot).
         """
-        mu = w_ij / (1.0 + self.beta)    # Dampened step size
+        mu = min(1.0, max(0.0, w_ij / (1.0 + self.beta)))
         delta = other.opinion - self.opinion
         self.opinion = np.clip(self.opinion + mu * delta, -1.0, 1.0)
 
@@ -143,16 +141,11 @@ class SocialAgent(Agent):
         Repulsion path - BACKFIRE.
 
         Agent's opinion is pushed *away* from the other agent.
+        Repulsion step size is clamped to [0, 1] for symmetry with assimilation.
 
-        This moves agent i in the OPPOSITE direction from j,
-        amplifying polarization. The step is dampened by beta so
-        already-extreme agents don't overshoot.
-
-        # NOVEL CONTRIBUTION
         Each backfire event increments F_i (Behavioral Frustration).
         """
-        # Push opinion AWAY from the other agent
-        repulsion = abs(w_ij) / (1.0 + self.beta)
+        repulsion = min(1.0, abs(w_ij) / (1.0 + self.beta))
         away = self.opinion - other.opinion      # Direction away from j
         self.opinion = np.clip(self.opinion + repulsion * away, -1.0, 1.0)
 
