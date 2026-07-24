@@ -348,13 +348,34 @@ def run_interaction_analysis(data_dict, metrics=None):
         })
 
     results_df = pd.DataFrame(interaction_rows)
-    if not results_df.empty:
-        adjusted = bonferroni_correct(results_df["p_value_raw"].tolist())
-        results_df["p_value_adjusted"] = adjusted
-        results_df["Bonferroni_m"] = len(adjusted)
-        results_df["Significant_0.05"] = [
-            "Yes" if p < 0.05 else "No" for p in adjusted
-        ]
+    if results_df.empty:
+        return results_df
+
+    # Primary interaction family excludes trust-KPI rows with Δ_alone≡0
+    # (same gating logic as pairwise degenerate flats). Those rows are still
+    # exported as descriptive Full-vs-TrustOnly contrasts on trust metrics.
+    in_family = results_df["Trust_KPI_Structural"] != "Yes"
+    family_p = results_df.loc[in_family, "p_value_raw"].tolist()
+    m_family = len(family_p)
+    family_adj = bonferroni_correct(family_p) if m_family else []
+
+    adjusted = []
+    family_idx = 0
+    for _, row in results_df.iterrows():
+        if row["Trust_KPI_Structural"] == "Yes":
+            adjusted.append(float("nan"))
+        else:
+            adjusted.append(family_adj[family_idx])
+            family_idx += 1
+
+    results_df["p_value_adjusted"] = adjusted
+    results_df["Bonferroni_m"] = m_family
+    results_df["In_Bonferroni_Family"] = [
+        "No" if t == "Yes" else "Yes" for t in results_df["Trust_KPI_Structural"]
+    ]
+    results_df["Significant_0.05"] = [
+        "Yes" if (pd.notna(p) and p < 0.05) else "No" for p in adjusted
+    ]
 
     return results_df
 
@@ -396,16 +417,21 @@ def format_table(pairwise_df, interaction_df):
     )
     print("-" * 110)
 
+    m_int = int(interaction_df["Bonferroni_m"].iloc[0]) if len(interaction_df) else 0
+    n_trust_excl = int((interaction_df.get("Trust_KPI_Structural") == "Yes").sum()) if len(interaction_df) else 0
+
     for _, row in interaction_df.iterrows():
         sig_mark = "Yes" if row["Significant_0.05"] == "Yes" else "No"
-        flag = " [trust-KPI]" if row.get("Trust_KPI_Structural") == "Yes" else ""
+        flag = " [trust-KPI excl.]" if row.get("Trust_KPI_Structural") == "Yes" else ""
+        adj_p = row["p_value_adjusted"]
+        adj_str = f"{adj_p:.6f}" if pd.notna(adj_p) else "n/a"
         print(
             f"  {row['Metric']:<22} | "
             f"{row['Mean_Bridge_Effect_Alone']:+13.4f} | "
             f"{row['Mean_Bridge_Effect_With_Trust']:+13.4f} | "
             f"{row['Cohen_d_Interaction']:+7.4f} | "
             f"{row['W_statistic']:<8.1f} | "
-            f"{row['p_value_adjusted']:.6f} | {sig_mark}{flag}"
+            f"{adj_str:<8} | {sig_mark}{flag}"
         )
     print("=" * 110)
     print(
@@ -413,12 +439,15 @@ def format_table(pairwise_df, interaction_df):
         f"(excludes {n_deg} degenerate flat contrasts)."
     )
     print("  * MWU retained in CSV as supplementary unpaired sensitivity.")
-    print("  * Interaction Bonferroni applied separately from pairwise family.")
     print(
-        "  * Trust-KPI interactions with Delta_alone=0 are design artifacts "
-        "(flagged); not comparable to retention moderation."
+        f"  * Interaction Bonferroni m={m_int} (excludes {n_trust_excl} "
+        f"trust-KPI rows with Delta_alone=0); separate from pairwise family."
     )
-    print("  * Trust_Segregation capped at 1e6 for analysis.")
+    print(
+        "  * Trust-KPI rows are descriptive Full-vs-TrustOnly contrasts, "
+        "not Filter×Trust moderation."
+    )
+    print("  * Trust_Segregation capped at 1e6 for analysis (not a model reporter).")
     print("=" * 110)
 
 

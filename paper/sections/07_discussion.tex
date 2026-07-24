@@ -8,7 +8,10 @@ We interpret the Polarization Paradox with Exit--Voice--Loyalty, discuss trust, 
 The Suppression Filter intercepts many Zone~3 events and reduces exit. Retention and retention-scaled revenue improve; because $\sigma(0)$ already exceeds the stylized cliff, that revenue gain is demographic. The filter often replaces rejection with Zone~2 silence rather than constructive engagement, so it does not build Voice. Closing exit without opening repair leaves extreme agents active, sustaining high \emph{active-agent} polarization while churn falls. Full-cohort $\sigma_{\mathrm{all}}$ does not rise, so the paradox is retention versus survivor dispersion---not population warming.
 
 \subsection{Dyadic Trust}
-Trust is double-edged. Agreement raises ingroup trust (mean $0.9808$ in Trust Only); conflict and asymmetry ($\delta_-/\delta_+ = 2.5$) following~\citet{Slovic1993} collapse outgroup trust (mean $0.0432$). With passive decay, trust segregates (mean ratio $31.28$; median $26.76$). These patterns come from enabling trust co-evolution, not from the Filter contrast. Trust shifts $w_{ij}$ before SJT zone classification (source-credibility weighting). Assimilation and repulsion step sizes are clamped to $[0,1]$ so high trust cannot produce DeGroot overshoot.
+Trust is double-edged. Agreement raises ingroup trust (mean $0.9808$ in Trust Only); conflict and asymmetry ($\delta_-/\delta_+ = 2.5$) following~\citet{Slovic1993} collapse outgroup trust (mean $0.0432$). With passive decay, trust segregates (mean ratio $31.28$; median $26.76$). These patterns come from enabling trust co-evolution, not from the Filter contrast. Trust shifts $w_{ij}$ before SJT zone classification (source-credibility weighting). Assimilation and repulsion step sizes are clamped to $[0,1]$ so high trust cannot produce DeGroot overshoot. Under our defaults, Filter $\times$ Trust interactions on active $\sigma$ and retention are non-significant after correction: trust co-evolution does not attenuate the paradox here.
+
+\subsection{Uniform SJT Latitudes}
+Assimilation and rejection thresholds ($\tau_{\mathrm{assim}}$, the $w_{ij}<0$ cut) are uniform across agents. That choice keeps the $2\times2$ interpretable but abstracts away person- and issue-specific latitudes that empirical SJT treats as heterogeneous and dynamic~\citep{Sherif1961}. Heterogeneous thresholds could change how often the Suppression Filter fires and how exit concentrates among dogmatic agents; we leave that extension to future work and treat present zone boundaries as stylized knobs, not calibrated psychometrics.
 
 \subsection{Conditional Implications}
 Curation systems often optimise engagement and retention. Our results suggest those objectives need not track cohesion among remaining users. If designers also care about cross-camp relational capital, suppression alone is an incomplete instrument. That statement is a conditional implication from a theoretical laboratory, not a prescription for any named platform.
@@ -16,7 +19,7 @@ Curation systems often optimise engagement and retention. Our results suggest th
 \subsection{Robustness}
 OFAT sweeps over $\beta_{\mathrm{mean}}$, $\tau_{\mathrm{assim}}$, $T_c$, $K$, $\gamma_T$, $E$, and $m_e$ (five replications per cell; $N=500$) preserve the qualitative filter--churn contrast at interior points; exceptions are identifiable boundaries (very low $\beta$; $E=0$; near-perfect $E=1$). See \texttt{sensitivity.py} and \texttt{output/sensitivity\_results.csv}.
 
-Additional checks (Results) are lower-power supplements: (i) placebo heal without intercept is weaker than intercept+heal; (ii) drop without heal matches no-heal intercept and is distinct from M0; (iii) Dynamic-BABE differs from HK / biased-DeGroot baselines in linking suppression to exit; (iv) Filter OFF/ON remains directionally similar on Watts--Strogatz under our defaults.
+Additional checks (Results) are lower-power \emph{descriptive} supplements: (i) placebo heal without intercept is weaker than intercept+heal; (ii) drop without heal and intercept with $B_{hb}=0$ are the same stochastic process under current code (identical per seed) and distinct from M0; (iii) Dynamic-BABE differs from HK / biased-DeGroot baselines in linking suppression to exit; (iv) Filter OFF/ON remains directionally similar on Watts--Strogatz under our defaults.
 
 \subsection{Limitations and Future Work}
 \begin{enumerate*}
@@ -26,5 +29,6 @@ Additional checks (Results) are lower-power supplements: (i) placebo heal withou
     \item \textbf{Pole edge case:} $\mathrm{sign}(\overline{O}_i)=0$ is a distinct pole (rare under bipolar init).
     \item \textbf{No field fit:} Parameters are not estimated from a named platform dataset.
     \item \textbf{Stylized filter and revenue:} Revenue $\approx$ retention under a pre-polarized cliff; not an audited production system.
+    \item \textbf{Uniform latitudes:} SJT thresholds do not vary by agent or issue.
 \end{enumerate*}
 Despite these limits, the model is a transparent testbed for how suppression and fragile trust jointly shape polarization and retention.

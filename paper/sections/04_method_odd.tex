@@ -107,7 +107,7 @@ We record the system's trajectory at the end of each step by collecting system-l
     \item \textbf{Average Frustration:} The mean frustration across active users.
     \item \textbf{Platform Revenue ($R(t)$):} Total advertising earnings under a stylized brand-safety step function of $\sigma(t)$.
     \item \textbf{Trust Segregation Ratio:} The ratio of mean ingroup trust to mean outgroup trust.
-    \item \textbf{Opinion-Weighted Clustering:} Among active--active--active triangles, the fraction that are same-pole.
+    \item \textbf{Opinion-Weighted Clustering:} Mean, over active agents, of each node's local share of same-pole triangles among its active--active--active wedges (a local clustering average, not a single global triangle fraction).
 \end{itemize*}
 
 \subsection{Details}
@@ -164,7 +164,7 @@ Under the \textbf{Dyadic Trust} system, relational trust modulates this weight, 
 \begin{equation}
     w_{ij} = 1.0 + \beta_i A_{ij} + \gamma_T T_{ij}
 \end{equation}
-where $\gamma_T = 0.3$ represents the trust influence coefficient and $T_{ij} \in [0, 1]$ represents the dyadic trust. This trust buffer mathematically models the relational buffer that keeps relationships intact during disagreement: high trust elevates the influence weight, preventing debate from deteriorating into hostile backfires. When trust co-evolution is disabled, the model sets $T_{ij} = 0$ dynamically in the weight equation, yielding the baseline form $w_{ij} = 1.0 + \beta_i A_{ij}$. This represents the unmodulated, baseline cognitive state and aligns the theoretical specification with our simulation codebase. Conceptually, shifting $w_{ij}$ via $T_{ij}$ is a source-credibility / relational-weighting mechanism layered on SJT zone classification, not a claim that trust itself is an SJT latitude.
+where $\gamma_T = 0.3$ represents the trust influence coefficient and $T_{ij} \in [0, 1]$ represents the dyadic trust. This trust buffer mathematically models the relational buffer that keeps relationships intact during disagreement: high trust elevates the influence weight, preventing debate from deteriorating into hostile backfires. When trust co-evolution is disabled, the code \emph{omits} the $\gamma_T T_{ij}$ term entirely (edges are not trust-initialized), yielding $w_{ij} = 1.0 + \beta_i A_{ij}$. Conceptually, shifting $w_{ij}$ via $T_{ij}$ is a source-credibility / relational-weighting mechanism layered on SJT zone classification, not a claim that trust itself is an SJT latitude.
 
 \subsubsection{Step 3: Social Judgment Zone Classification}
 Unlike the collective, synchronous averaging of Chen et al. \citep{Chen2021}, we translate this cognitive logic into a local, pairwise interaction paradigm. To track individual metrics like frustration, churn, and algorithmic interventions, we classify interactions using Social Judgment Theory \citep{Sherif1961, Jager2005}. The perceived influence weight $w_{ij}$ dictates the interaction zone:
@@ -175,7 +175,7 @@ Unlike the collective, synchronous averaging of Chen et al. \citep{Chen2021}, we
         3 \quad (\text{Latitude of Rejection}) & \text{if } w_{ij} < 0.0
     \end{cases}
 \end{equation}
-where $\tau_{\text{assim}} = 0.3$ represents the assimilation threshold. We model these latitude boundaries as stylized, uniform thresholds across the population for mathematical tractability and to isolate the systemic co-evolutionary feedback loops. In empirical social systems, these latitudes are highly subjective and dynamic, varying widely across individuals based on issue-specific emotional involvement and prior ideological extremity. We discuss the implications of this stylized assumption in the Discussion (Section~\ref{sec:discussion}).
+where $\tau_{\text{assim}} = 0.3$ represents the assimilation threshold. We model these latitude boundaries as stylized, uniform thresholds across the population for mathematical tractability and to isolate co-evolutionary feedback. Empirical SJT latitudes are heterogeneous and dynamic; implications of the uniform assumption are discussed in Section~\ref{sec:discussion}.
 
 \subsubsection{Step 4: Algorithmic Moderation (Suppression Filter)}
 When active (Filter ON), the platform's Suppression Filter intercepts backfire (Zone 3) events with an efficacy rate of $E = 0.46$:\footnote{The internal simulation flag remains \texttt{enable\_bridge} for legacy continuity with the codebase; it toggles this Suppression Filter and does \emph{not} implement constructive bridging ranking.}
@@ -195,7 +195,7 @@ We update the opinion vector $\vec{O}_i$ depending on the final interaction zone
     \begin{equation}
         \mu_{ij} = \min\left(1.0,\, \max\left(0.0,\, \frac{w_{ij}}{1.0 + \beta_i}\right)\right)
     \end{equation}
-    Without the clamp, high trust can push the raw ratio above $1$; the clamp restores classical DeGroot convexity. Opinions are then clipped element-wise by $\Pi_{[-1,1]}$. A short diagnostic after the clamp reports $0\%$ of assimilation updates with applied $\mu_{ij}>1$ under both Trust OFF and Trust ON (\texttt{scripts/mu\_overshoot\_diagnostic.py}).
+    Without the clamp, high trust can push the raw ratio $w_{ij}/(1+\beta_i)$ above $1$; the clamp restores classical DeGroot convexity. Opinions are then clipped element-wise by $\Pi_{[-1,1]}$. A diagnostic (\texttt{scripts/mu\_overshoot\_diagnostic.py}; seeds $0$--$2$) finds that the uncapped ratio exceeds $1$ in $0\%$ of assimilation updates under Trust OFF but $\approx 87.6\%$ under Trust ON; after the clamp, applied $\mu_{ij}>1$ is $0\%$ in both cases.
     
     \item \textbf{Zone 2 (Non-Commitment):} The interaction is ignored, leaving the opinion vector unchanged:
     \begin{equation}
@@ -271,7 +271,7 @@ Ablation M5 (multiplier fixed at $1.0$) confirms the cliff mainly rescales dolla
 \begin{equation}
     \sigma(t) = \sqrt{\frac{1}{K} \sum_{d=1}^K \mathrm{SD}\Big(\{O_{i,d}(t) : i \in \mathcal{A}(t)\}\Big)^2}
 \end{equation}
-where $\mathcal{A}(t) = \{i \in V : \text{Active}_i(t) = \text{True}\}$. Analysis caps Trust Segregation at $10^{6}$ when outgroup trust is numerically zero. This formulation avoids the ``data flattening'' trap: averaging opinions across dimensions can cancel opposed extremes (e.g., $[+1,-1]$), whereas per-dimension dispersion preserved under RMS does not.
+where $\mathcal{A}(t) = \{i \in V : \text{Active}_i(t) = \text{True}\}$. The model reporter may emit $\infty$ when outgroup trust is numerically zero; \texttt{stats\_analysis.py} caps Trust Segregation at $10^{6}$ as an \emph{analysis} transform for tables and tests (not a change to the simulation). This polarization construction avoids the ``data flattening'' trap: averaging opinions across dimensions can cancel opposed extremes (e.g., $[+1,-1]$), whereas per-dimension dispersion preserved under RMS does not.
 
 Ingroup and outgroup trust metrics classify an agent's pole by $\mathrm{sign}(\overline{O}_i)$, the sign of the mean opinion across issues. Agents with mean opinion exactly zero ($\mathrm{sign}(0)=0$) are rare under bipolar initialization but, when present, are treated as a distinct zero pole for edge classification; we discuss this edge case as a limitation.
 
@@ -310,4 +310,7 @@ $t_{\max}$ & Maximum simulation step limit & $200$ & Conversational equilibrium 
 \end{tabular}
 \end{table}
 
-Default values in Table~\ref{tab:parameters} are theoretical settings, not fitted to a proprietary log. OFAT sweeps (\texttt{sensitivity.py}; \texttt{output/sensitivity\_results.csv}) show the qualitative filter--churn contrast is robust at interior points and fragile mainly at boundaries ($E=0$, near-perfect $E=1$, very low $\beta$); see Discussion.
+Default values in Table~\ref{tab:parameters} are exploratory theoretical knobs, not fitted to a proprietary log or tuned to a single churn target. OFAT sweeps (\texttt{sensitivity.py}; \texttt{output/sensitivity\_results.csv}) show the qualitative filter--churn contrast is robust at interior points and fragile mainly at boundaries ($E=0$, near-perfect $E=1$, very low $\beta$); see Discussion.
+
+\subsubsection{Implementation and Replication}
+Dynamic-BABE is implemented in Python with Mesa~$2.x$ (\texttt{mesa>=2.1,<3.0}; see \texttt{requirements.txt}), NumPy, and NetworkX. Replicate the main $2\times2$ with \texttt{batch\_run.py}, then \texttt{stats\_analysis.py}, \texttt{visualize.py}, and \texttt{python -m experiments.plot\_experiments}. Optional checks: \texttt{scripts/mu\_overshoot\_diagnostic.py}, \texttt{scripts/check\_reproducibility.py}. Public code: \url{https://github.com/TheCoolSam/BABEModel}. CSV condition labels retain the legacy name ``Bridge Only'' for the Filter Only cell; the paper maps that label to Suppression Filter ON.

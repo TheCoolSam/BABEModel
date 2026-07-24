@@ -32,7 +32,7 @@ class SocialAgent(Agent):
 
         # Opinion vector
         if getattr(cfg, 'OPINION_INIT_MODE', 'uniform') == 'bipolar':
-            # Bipolar: 50/50 split into two camps (±0.7 ± noise)
+            # Bipolar: 50/50 camps; each issue = pole * U(0.4, 1.0) (E[|O|]≈0.7)
             # Models an already-polarised society (realistic for social media)
             pole = 1.0 if rng.random() < 0.5 else -1.0
             self.opinion = np.clip(
