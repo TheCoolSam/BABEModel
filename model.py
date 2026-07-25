@@ -171,13 +171,12 @@ def compute_outgroup_trust(model):
 
 def compute_opinion_clustering(model):
     """
-    Opinion-Weighted Clustering Coefficient.
+    Same-pole triangle purity (reporter name: Opinion_Clustering).
 
-    Measures the fraction of each node's triangles where all three
-    vertices share the same opinion pole.  High values indicate
-    structurally-clustered echo chambers.
-
-    Returns global average across active agents.
+    For each active node, among closed active--active--active triangles,
+    the share that are mono-pole. High values indicate local same-pole
+    structure. Returns the mean over active agents (not opinion-value
+    weighted; not a classical wedge clustering coefficient).
     """
     if not cfg.ENABLE_ECHO_CHAMBER_METRICS:
         return 0.0

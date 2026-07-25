@@ -347,14 +347,14 @@ def plot_trust_dynamics(df):
 
 def plot_echo_chamber(df):
     """
-    Fig 7 — Opinion Clustering Coefficient over time, all 4 conditions.
+    Fig 7 — Same-pole triangle purity over time, all 4 conditions.
     """
     if "Opinion_Clustering" not in df.columns:
         print("  Skipped: fig7_echo_chambers.png (no clustering data)")
         return
 
     plot_metric(df, "Opinion_Clustering",
-                "Opinion Clustering Coefficient",
+                "Same-pole triangle purity",
                 "Echo Chamber Formation — 2×2 Factorial",
                 "fig7_echo_chambers.png")
 

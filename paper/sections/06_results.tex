@@ -1,7 +1,7 @@
 % paper/sections/06_results.tex
 % Results Section
 
-Our $2\times2$ experiments cross the Suppression Filter (ON/OFF) with dyadic trust (ON/OFF). Each cell has $30$ runs of $200$ steps with seed $42+i$ for run $i$. Primary pairwise inference uses seed-paired Wilcoxon signed-rank tests with Bonferroni correction over $m=62$ non-degenerate contrasts (identically flat trust-KPI cells when Trust OFF are excluded from $m$); Mann--Whitney $U$ is supplementary only. Cohen's $d$ uses $(\bar x_1-\bar x_2)/\mathrm{SD}_{\mathrm{pooled}}$. For near-separated churn and revenue we emphasize mean differences and CIs; very large $|d|$ is a separation signal, not a continuum effect size. SciPy's Wilcoxon $W$ is the minimum of the two signed-rank sums ($W=0$ indicates complete same-direction separation among nonzero paired differences). Primary polarization $\sigma$ is over \emph{active} agents; $\sigma_{\mathrm{all}}$ retains last opinions of churned agents. CSV condition labels retain the legacy name ``Bridge Only'' for Filter Only.
+Our $2\times2$ experiments cross the Suppression Filter (ON/OFF) with dyadic trust (ON/OFF). Each cell has $30$ runs of $200$ steps with seed $42+i$ for run $i$. Primary pairwise inference uses seed-paired Wilcoxon signed-rank tests. The lead scientific contrast is Baseline vs.\ Filter Only on retention (churn) and active $\sigma$; revenue is a scaled retention readout under fixed $M_{\mathrm{unsafe}}$. Adjusted $p$-values reported below come from a conservative Bonferroni secondary screen ($m=62$ non-degenerate pairwise contrasts; flat Trust-OFF trust KPIs excluded). Mann--Whitney $U$ is supplementary only. Cohen's $d=(\bar x_1-\bar x_2)/\mathrm{SD}_{\mathrm{pooled}}$ follows the printed Group1 vs.\ Group2 order (negative $d$ when Group2 is larger). For near-separated churn and revenue we emphasize mean differences and CIs; very large $|d|$ is a separation signal. SciPy's Wilcoxon $W$ is the minimum of the two signed-rank sums ($W=0$ indicates complete same-direction separation among nonzero paired differences). Primary polarization $\sigma$ is over \emph{active} agents; $\sigma_{\mathrm{all}}$ retains last opinions of churned agents. CSV condition labels retain the legacy name ``Bridge Only'' for Filter Only.
 
 \subsection{The Polarization Paradox: Retention vs.\ Active-User Dispersion}
 We begin with \textbf{Baseline} vs.\ \textbf{Filter Only}, isolating the Suppression Filter when trust is off. The tension between short-term retention and active-user polarization is the \textbf{Polarization Paradox}.
@@ -15,14 +15,14 @@ Activating the Suppression Filter (\textbf{Filter Only}) cuts churn to $0.38\%$ 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.58\textwidth]{figures/fig3_churn_factorial.png}
-    \caption{Cumulative user churn rate over time ($N=500$, $30$ runs per condition). Filter ON conditions show near-zero exit ($0.38\%$); Filter OFF conditions show high attrition ($\approx 39\%$). Error ribbons: $95\%$ CIs.}
+    \caption{Cumulative user churn rate over time ($N=500$, $30$ runs per condition). Filter Only mean final churn is $0.38\%$; Full Model is $0.21\%$; Filter OFF conditions show high attrition ($\approx 39\%$). Error ribbons: $95\%$ CIs.}
     \label{fig:churn}
 \end{figure}
 
 Mean frustration among active users falls to $0.5819$ ($\text{SD} = 0.0576$, $95\%\ \text{CI} = [0.5617, 0.6024]$, $W = 2.0$, $p_{\text{adjusted}} < 3.5 \times 10^{-7}$, $d = 3.08$). Step-wise revenue rises to \$199.24 ($\text{SD} = \$0.61$, $95\%\ \text{CI} = [\$199.03, \$199.45]$, $W = 0.0$, $p_{\text{adjusted}} < 1.1 \times 10^{-4}$). The $\approx \$78$ mean increase is demographic retention under fixed $M_{\text{unsafe}}=0.4$: because $\sigma(0)\approx 0.7 > \tau_{\text{cliff}}=0.6$, the stylized cliff does not switch in the main $2\times2$.
 
 \subsubsection{Active-Agent Polarization and Full-Cohort Robustness}
-Active-agent $\sigma$ rises from $0.9550$ ($\text{SD} = 0.0389$, $95\%\ \text{CI} = [0.9409, 0.9683]$) in Baseline to $0.9904$ ($\text{SD} = 0.0042$, $95\%\ \text{CI} = [0.9888, 0.9918]$) under Filter Only (mean difference $+0.0353$; $W = 12.0$, $p_{\text{adjusted}} < 8.1 \times 10^{-6}$, $d = -1.28$; Figure~\ref{fig:polarization}). Baseline exit removes extreme agents from the active set; the filter retains them.
+Active-agent $\sigma$ rises from $0.9550$ ($\text{SD} = 0.0389$, $95\%\ \text{CI} = [0.9409, 0.9683]$) in Baseline to $0.9904$ ($\text{SD} = 0.0042$, $95\%\ \text{CI} = [0.9888, 0.9918]$) under Filter Only (mean difference $+0.0353$; $W = 12.0$, $p_{\text{adjusted}} < 8.1 \times 10^{-6}$, $|d| = 1.28$ with $d = -1.28$ under Group1$=$Baseline, Group2$=$Filter Only; Figure~\ref{fig:polarization}). Baseline exit removes extreme agents from the active set; the filter retains them.
 
 \begin{figure}[htbp]
     \centering
@@ -49,12 +49,12 @@ Seed-paired contrasts:
     \Delta_{\text{alone}} &= \text{Metric}(\text{Filter Only}) - \text{Metric}(\text{Baseline}) \\
     \Delta_{\text{with trust}} &= \text{Metric}(\text{Full Model}) - \text{Metric}(\text{Trust Only})
 \end{align}
-Wilcoxon tests on $\Delta_{\text{with trust}}-\Delta_{\text{alone}}$ use a separate Bonferroni family of size $m=7$ after excluding trust-KPI rows with $\Delta_{\mathrm{alone}}\equiv 0$ (Table~\ref{tab:interaction}). Those excluded rows are descriptive Full-vs-TrustOnly contrasts on trust metrics, not Filter$\times$Trust moderation. Opinion clustering is included in the family (CSV); its interaction is non-significant ($W=168$, adj.\ $p=1$).
+Wilcoxon tests on $\Delta_{\text{with trust}}-\Delta_{\text{alone}}$ use a separate interaction Bonferroni family of size $m=7$ after excluding trust-KPI rows with $\Delta_{\mathrm{alone}}\equiv 0$ (Table~\ref{tab:interaction}). Those excluded rows are descriptive Full-vs-TrustOnly contrasts on trust metrics, not Filter$\times$Trust moderation. Same-pole triangle purity is included in the family (CSV column \texttt{Opinion\_Clustering}); its interaction is non-significant ($W=168$, adj.\ $p=1$).
 
 \begin{table}[htbp]
 \centering
 \footnotesize
-\caption{Filter $\times$ Trust interaction (seed-paired). Primary family $m=7$ excludes trust-KPI rows with $\Delta_{\mathrm{alone}}=0$ (shown below the rule for transparency; adj.\ $p$ n/a).}
+\caption{Filter $\times$ Trust interaction (seed-paired). Interaction family $m=7$ excludes trust-KPI rows with $\Delta_{\mathrm{alone}}=0$ (shown below the rule for transparency; adj.\ $p$ n/a). Active Users / Churn / Revenue are dependent retention readouts.}
 \label{tab:interaction}
 \begin{tabular}{lccccc}
 \toprule
@@ -64,7 +64,7 @@ Wilcoxon tests on $\Delta_{\text{with trust}}-\Delta_{\text{alone}}$ use a separ
 Active Users & $+194.0$ & $+190.3$ & $-0.3347$ & $117.5$ & $0.1250$ \\
 Avg.\ Frustration & $-0.3849$ & $-0.3915$ & $-0.0368$ & $216.0$ & $1.0000$ \\
 Churn Rate & $-38.80\%$ & $-38.05\%$ & $+0.3347$ & $121.0$ & $0.1523$ \\
-Opinion Clustering & $-0.0486$ & $-0.0446$ & $+0.2086$ & $168.0$ & $1.0000$ \\
+Same-pole purity & $-0.0486$ & $-0.0446$ & $+0.2086$ & $168.0$ & $1.0000$ \\
 Polarization ($\sigma$) & $+0.0353$ & $+0.0336$ & $-0.0469$ & $208.0$ & $1.0000$ \\
 Polarization ($\sigma_{\mathrm{all}}$) & $+0.0000$ & $-0.0002$ & $-0.0382$ & $221.0$ & $1.0000$ \\
 Revenue & $+\$77.60$ & $+\$76.11$ & $-0.3347$ & $111.0$ & $0.0871$ \\
@@ -78,15 +78,15 @@ Trust Segregation$^{\dagger}$ & $0.0000$ & $+5.3710$ & $+0.4417$ & $135.0$ & n/a
 \end{tabular}%
 \end{table}
 
-Retention interactions (Active Users, Churn, Frustration, Revenue) remain non-significant after Bonferroni. With $n=30$, we report \emph{no evidence of moderation}, not statistical equivalence of Filter effects with and without trust. Active $\sigma$ likewise shows no Filter$\times$Trust interaction ($W=208$, adj.\ $p=1$).
+Retention interactions (Active Users, Churn, Revenue---dependent readouts---and Frustration) remain non-significant after Bonferroni. Some raw $p$-values are $\approx 0.01$--$0.02$ before correction and then fail the $m=7$ family; with $n=30$ we report \emph{no evidence of moderation}, not statistical equivalence of Filter effects with and without trust. Active $\sigma$ likewise shows no Filter$\times$Trust interaction ($W=208$, adj.\ $p=1$).
 
 \subsection{Echo Chambers}
-Opinion-weighted clustering uses the local active-triple average (Figure~\ref{fig:clustering}). Baseline mean $0.1316$ ($\text{SD} = 0.0255$, $95\%\ \text{CI} = [0.1228, 0.1407]$); Trust Only $0.1316$ ($W = 226.0$, $p_{\text{adjusted}} = 1$). Filter Only lowers clustering to $0.0830$ ($\text{SD} = 0.0152$, $95\%\ \text{CI} = [0.0776, 0.0884]$, $W = 0.0$, $p_{\text{adjusted}} < 1.2 \times 10^{-7}$, $d = 2.32$). Full Model: $0.0870$ ($\text{SD} = 0.0136$, $95\%\ \text{CI} = [0.0821, 0.0919]$, $W = 0.0$, $p_{\text{adjusted}} < 1.2 \times 10^{-7}$, $d = 2.19$). The filter can reduce local same-pole triangles while active-agent $\sigma$ stays high---another active-set nuance.
+Same-pole triangle purity (local closed active triples; Figure~\ref{fig:clustering}) averages $0.1316$ in Baseline ($\text{SD} = 0.0255$, $95\%\ \text{CI} = [0.1228, 0.1407]$); Trust Only $0.1316$ ($W = 226.0$, $p_{\text{adjusted}} = 1$). Filter Only lowers purity to $0.0830$ ($\text{SD} = 0.0152$, $95\%\ \text{CI} = [0.0776, 0.0884]$, $W = 0.0$, $p_{\text{adjusted}} < 1.2 \times 10^{-7}$, $|d| = 2.32$). Full Model: $0.0870$ ($\text{SD} = 0.0136$, $95\%\ \text{CI} = [0.0821, 0.0919]$, $W = 0.0$, $p_{\text{adjusted}} < 1.2 \times 10^{-7}$, $|d| = 2.19$). The filter can reduce local mono-pole triangles while active-agent $\sigma$ stays high---another active-set / KPI nuance.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.58\textwidth]{figures/fig7_echo_chambers.png}
-    \caption{Opinion-weighted clustering (local active-triple average). Filter ON conditions reduce local same-pole triangles relative to Baseline while active-agent polarization remains high. Error ribbons: $95\%$ CIs.}
+    \caption{Same-pole triangle purity (local closed active triples). Filter ON conditions reduce local mono-pole triangles relative to Baseline while active-agent polarization remains high. Error ribbons: $95\%$ CIs.}
     \label{fig:clustering}
 \end{figure}
 

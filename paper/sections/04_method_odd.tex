@@ -42,7 +42,7 @@ Each step $t$ triggers a sequence of operations that update opinions, frustratio
     \begin{equation}
         T_{uv}(t+1) = T_{uv}(t) \cdot (1 - \lambda)
     \end{equation}
-    \item \textbf{Platform Diagnostics:} The model computes and logs global metrics: opinion polarization $\sigma(t)$ over active agents, full-cohort polarization $\sigma_{\mathrm{all}}(t)$ (churned agents retain last opinions), cumulative churn, user frustration, active user count, ingroup/outgroup trust divergence, and opinion-weighted clustering.
+    \item \textbf{Platform Diagnostics:} The model computes and logs global metrics: opinion polarization $\sigma(t)$ over active agents, full-cohort polarization $\sigma_{\mathrm{all}}(t)$ (churned agents retain last opinions), cumulative churn, user frustration, active user count, ingroup/outgroup trust divergence, and same-pole triangle purity.
     \item \textbf{Termination Check:} The simulation halts when the step count reaches $t_{\max} = 200$, or if all users exit ($N_{\text{active}} = 0$).
 \end{enumerate*}
 
@@ -58,7 +58,7 @@ Finally, we operationalize user exit by mapping the accumulation of frustration 
 \subsubsection{Individual Decision-Making}
 Agents employ heuristic cognitive updates rather than rational utility maximization, strictly following the bounded rationality principles of the ODD+D protocol.
 \begin{itemize*}
-    \item \textbf{Objectives:} Agents do not maximize an explicit utility or payoff function. Instead, their immediate psychological objective is to minimize cognitive dissonance. They seek agreeable social contact that reinforces their existing views while avoiding highly confrontational outgroup viewpoints that land in their Latitude of Rejection.
+    \item \textbf{Objectives:} Agents do not maximize an explicit utility or payoff function. Partner choice is uniform at random among active neighbors; there is no selective seeking of agreeable contacts. After contact, zone-conditioned updates (assimilation, ignore, or repulsion) and frustration dynamics implement a heuristic response that reduces dissonance when agreement occurs and raises exit pressure under repeated rejection-zone conflict.
     \item \textbf{Information Processing:} When active, an agent perceives the opinion vector $\vec{O}_j$ and salience weights $\vec{S}_j$ of their chosen dialogue partner. They process this information heuristically by calculating their salience-weighted opinion alignment $A_{ij}$ and checking whether the resulting influence weight lands in their Latitude of Acceptance, Non-Commitment, or Rejection.
     \item \textbf{Adaptive Behavior:} Agents adapt dynamically across two scales. Cognitively, they adjust their opinion vectors $\vec{O}_i$ to assimilate toward agreeable peers or repel away from hostile ones. Behaviorally, they accumulate frustration $F_i$ when clashing with others, leading to permanent exit (churn) if their frustration threshold is breached. Relationally, their dyadic trust $T_{ij}$ adapts to reward agreement and penalize conflict, reshaping future interaction weights.
 \end{itemize*}
@@ -78,13 +78,16 @@ Interactions unfold locally, dyadically, and directionally. While trust updates 
 \subsubsection{Collectives}
 No formal collectives (such as political parties or coalitions) exist in our model. However, functional collectives emerge endogenously through conversational dynamics. Agents coalesce into two opposing ideological factions based on their opinion signs. These emergent camps govern the flow of trust and drive the self-organization of network clusters.
 
+\subsubsection{Emergence}
+Macro patterns that are not hard-coded include: (i) the Polarization Paradox---high retention with high active-set $\sigma$ when the filter blocks exit of extremes, while $\sigma_{\mathrm{all}}$ stays flat; (ii) trust segregation when dyadic trust is enabled; (iii) reduced local same-pole triangle purity under Filter ON even while active $\sigma$ remains high. These arise from the interaction of SJT zones, exit, filtering, and (when on) trust updates.
+
 \subsubsection{Heterogeneity}
 We introduce substantial heterogeneity across several parameters:
 \begin{itemize*}
     \item \textbf{Ideological Camps:} Bipolar initial opinions split the population into two opposed factions.
     \item \textbf{Issue Salience:} Diverse attention allocations drawn from a Dirichlet distribution mean agents prioritize issues differently.
     \item \textbf{Cognitive Entrenchment:} The entrenchment parameter $\beta_i$ varies across agents, mixing dogmatic and open-minded individuals.
-    \item \textbf{Network Topology:} The Barab\'{a}si-Albert topology yields a heavy-tailed degree distribution where a few highly connected hubs exert massive social influence while the rest have minimal reach.
+    \item \textbf{Network Topology:} The Barab\'{a}si-Albert topology yields a heavy-tailed degree distribution: hubs are chosen as partners more often (higher exposure opportunity under random neighbor selection), not because they have stronger per-interaction influence.
 \end{itemize*}
 
 \subsubsection{Stochasticity}
@@ -107,7 +110,7 @@ We record the system's trajectory at the end of each step by collecting system-l
     \item \textbf{Average Frustration:} The mean frustration across active users.
     \item \textbf{Platform Revenue ($R(t)$):} Total advertising earnings under a stylized brand-safety step function of $\sigma(t)$.
     \item \textbf{Trust Segregation Ratio:} The ratio of mean ingroup trust to mean outgroup trust.
-    \item \textbf{Opinion-Weighted Clustering:} Mean, over active agents, of each node's local share of same-pole triangles among its active--active--active wedges (a local clustering average, not a single global triangle fraction).
+    \item \textbf{Same-Pole Triangle Purity:} Mean, over active agents, of each node's share of closed active--active--active triangles that are mono-pole (neighbor--neighbor edge required). This is local triangle purity by opinion pole, not a classical wedge-normalized clustering coefficient and not opinion-value weighted.
 \end{itemize*}
 
 \subsection{Details}
@@ -195,7 +198,7 @@ We update the opinion vector $\vec{O}_i$ depending on the final interaction zone
     \begin{equation}
         \mu_{ij} = \min\left(1.0,\, \max\left(0.0,\, \frac{w_{ij}}{1.0 + \beta_i}\right)\right)
     \end{equation}
-    Without the clamp, high trust can push the raw ratio $w_{ij}/(1+\beta_i)$ above $1$; the clamp restores classical DeGroot convexity. Opinions are then clipped element-wise by $\Pi_{[-1,1]}$. A diagnostic (\texttt{scripts/mu\_overshoot\_diagnostic.py}; seeds $0$--$2$) finds that the uncapped ratio exceeds $1$ in $0\%$ of assimilation updates under Trust OFF but $\approx 87.6\%$ under Trust ON; after the clamp, applied $\mu_{ij}>1$ is $0\%$ in both cases.
+    Without the clamp, high trust can push the raw ratio $w_{ij}/(1+\beta_i)$ above $1$; the clamp restores classical DeGroot convexity. Opinions are then clipped element-wise by $\Pi_{[-1,1]}$. A diagnostic (\texttt{scripts/mu\_overshoot\_diagnostic.py}; seeds $0$--$2$) finds that the uncapped ratio exceeds $1$ in $0\%$ of assimilation updates under Trust OFF but $\approx 87.6\%$ under Trust ON; after the clamp, applied $\mu_{ij}>1$ is $0\%$ in both cases. Thus under Trust ON the assimilation \emph{step-size} channel is often saturated at $\mu=1$, so trust's main cognitive pathway is likely zone-shifting via $\gamma_T T_{ij}$ rather than larger DeGroot steps.
     
     \item \textbf{Zone 2 (Non-Commitment):} The interaction is ignored, leaving the opinion vector unchanged:
     \begin{equation}
@@ -299,7 +302,7 @@ $r_{\text{ad}}$ & Base advertising rate per step & \$1.00 & Retention scale unit
 $\tau_{\text{cliff}}$ & Stylized revenue cliff & $0.6$ & Inert in main $2\times2$ by design \\
 $M_{\text{safe}}$ & Safe revenue multiplier & $1.0$ & Unused in main $2\times2$ trajectories \\
 $M_{\text{unsafe}}$ & Unsafe revenue multiplier & $0.4$ & Constant scale under pre-polarized init \\
-$E$ & Suppression-filter efficacy & $0.46$ & Theoretical interception probability \\
+$E$ & Suppression-filter efficacy & $0.46$ & Exploratory interior knob (near $0.5$; not fitted) \\
 $T_0$ & Initial dyadic trust weight & $0.5$ & Relational neutrality starting state \\
 $\gamma_T$ & Trust buffer influence coefficient & $0.3$ & Disagreement buffering coefficient \\
 $\delta_+$ & Trust building step size (gain) & $0.02$ & Slow relational capital accumulation \\
@@ -310,7 +313,7 @@ $t_{\max}$ & Maximum simulation step limit & $200$ & Conversational equilibrium 
 \end{tabular}
 \end{table}
 
-Default values in Table~\ref{tab:parameters} are exploratory theoretical knobs, not fitted to a proprietary log or tuned to a single churn target. OFAT sweeps (\texttt{sensitivity.py}; \texttt{output/sensitivity\_results.csv}) show the qualitative filter--churn contrast is robust at interior points and fragile mainly at boundaries ($E=0$, near-perfect $E=1$, very low $\beta$); see Discussion.
+Default values in Table~\ref{tab:parameters} are exploratory theoretical knobs, not fitted to a proprietary log or tuned to a single churn target. $E=0.46$ is an arbitrary interior value near one-half (not a calibrated rate); the OFAT grid uses $\{0.0, 0.2, 0.4, 0.6, 0.8, 1.0\}$ and therefore brackets the default without hitting it exactly. OFAT sweeps (\texttt{sensitivity.py}; \texttt{output/sensitivity\_results.csv}; five replications; Trust OFF except when sweeping $\gamma_T$) show the qualitative filter--churn contrast is robust at interior points and fragile at boundaries: $E=0$ restores Baseline-like exit; near-perfect $E=1$ removes almost all repulsion and can drive Filter ON toward consensus ($\sigma\to 0$), so the paradox is an \emph{interior} phenomenon. See Discussion.
 
 \subsubsection{Implementation and Replication}
 Dynamic-BABE is implemented in Python with Mesa~$2.x$ (\texttt{mesa>=2.1,<3.0}; see \texttt{requirements.txt}), NumPy, and NetworkX. Replicate the main $2\times2$ with \texttt{batch\_run.py}, then \texttt{stats\_analysis.py}, \texttt{visualize.py}, and \texttt{python -m experiments.plot\_experiments}. Optional checks: \texttt{scripts/mu\_overshoot\_diagnostic.py}, \texttt{scripts/check\_reproducibility.py}. Public code: \url{https://github.com/TheCoolSam/BABEModel}. CSV condition labels retain the legacy name ``Bridge Only'' for the Filter Only cell; the paper maps that label to Suppression Filter ON.
